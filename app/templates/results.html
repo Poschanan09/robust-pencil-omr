@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Results & Scoring Report - Robust Pencil OMR{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    {% if data %}
+    <!-- Single Sheet Detailed Report -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
+                <a href="/" class="hover:text-blue-600">Dashboard</a>
+                <span>/</span>
+                <a href="/processing/{{ image_id }}" class="hover:text-blue-600 font-mono">{{ image_id }}</a>
+                <span>/</span>
+                <span class="font-semibold text-slate-700">รายงานผลคะแนน</span>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">รายงานสรุปผลการตรวจข้อสอบ (Scoring Report)</h1>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/api/results/{{ image_id }}/export/csv" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
+                <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600"></i>Download CSV
+            </a>
+            <a href="/api/results/{{ image_id }}/export/json" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
+                <i class="fa-solid fa-file-code mr-1.5 text-blue-600"></i>Download JSON
+            </a>
+            <a href="/processing/{{ image_id }}" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+                <i class="fa-solid fa-images mr-1.5"></i>ดูภาพ Pipeline
+            </a>
+        </div>
+    </div>
+
+    <!-- Auto-Grading with Answer Key Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="border-b border-slate-100 pb-4">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                <i class="fa-solid fa-graduation-cap mr-2 text-blue-600"></i>
+                ตรวจคะแนนเทียบกับเฉลยข้อสอบ (Auto-Grading with Answer Key)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">กรอกรหัสเฉลยคำตอบ (เช่น 1:A, 2:B, 3:C...) เพื่อให้ระบบคำนวณคะแนนและข้อถูก/ผิดอัตโนมัติ</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="flex gap-3">
+                <input type="text" id="answer-key-input" placeholder="ตัวอย่าง: 1:A, 2:B, 3:C, 4:D, 5:E (หรือใส่เฉพาะข้อที่ต้องการตรวจ)" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button id="btn-grade" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center space-x-1.5 flex-shrink-0">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>คำนวณคะแนน</span>
+                </button>
+            </div>
+
+            <!-- Score Results Container (Initially Hidden) -->
+            <div id="score-card" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">คะแนนสอบที่ได้ (Score Result)</span>
+                        <div class="flex items-baseline space-x-2 mt-1">
+                            <span id="score-number" class="text-3xl font-extrabold text-blue-600">0</span>
+                            <span class="text-sm font-bold text-slate-400">/ <span id="score-total">50</span> คะแนน</span>
+                            <span id="score-badge" class="ml-3 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">0%</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-4 text-xs">
+                        <div class="text-center">
+                            <span class="text-slate-400 block">ถูกต้อง</span>
+                            <strong id="stat-correct" class="text-emerald-600 text-base">0</strong>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-slate-400 block">ตอบผิด</span>
+                            <strong id="stat-incorrect" class="text-red-600 text-base">0</strong>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-slate-400 block">ไม่ตอบ</span>
+                            <strong id="stat-unattempted" class="text-slate-500 text-base">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Overlay Image Viewer -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800">ภาพสรุปผลตรวจกระดาษคำตอบ (Diagnostic Overlay)</h2>
+            <a href="/api/process/{{ image_id }}/debug/overlay" target="_blank" class="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>เปิดภาพขนาดเต็ม
+            </a>
+        </div>
+        <div class="bg-slate-100 rounded-xl p-4 flex items-center justify-center max-h-[600px] overflow-auto border border-slate-200">
+            <img src="/api/process/{{ image_id }}/debug/overlay" class="max-h-[560px] object-contain shadow-md rounded bg-white" alt="Overlay Result">
+        </div>
+    </div>
+
+    {% else %}
+    <!-- All Sessions Overview Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-6">
+        <div class="px-6 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">รายการกระดาษคำตอบทั้งหมด (All Processed Sheets)</h1>
+                <p class="text-xs text-slate-500">ดูผลการตรวจและสถิติการส่งตรวจทานของทุกชุดข้อมูล</p>
+            </div>
+            <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm hover:bg-blue-700 self-start sm:self-auto">
+                <i class="fa-solid fa-plus mr-1.5"></i>ตรวจข้อสอบใหม่
+            </a>
+        </div>
+
+        <div class="p-6">
+            {% if sessions and sessions|length > 0 %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3">Session ID</th>
+                            <th class="px-4 py-3">สถานะ (Status)</th>
+                            <th class="px-4 py-3 text-center">ข้อที่ฝน</th>
+                            <th class="px-4 py-3 text-center">ข้อเว้นว่าง</th>
+                            <th class="px-4 py-3 text-center">ข้อกำกวม</th>
+                            <th class="px-4 py-3 text-center">เวลาประมวลผล</th>
+                            <th class="px-4 py-3 text-right">การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for s in sessions %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 py-3 font-mono font-bold text-slate-800">
+                                <a href="/processing/{{ s.image_id }}" class="hover:text-blue-600">{{ s.image_id }}</a>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if s.status == 'success' %}
+                                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800">
+                                    SUCCESS
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-red-100 text-red-800">
+                                    REJECTED
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-emerald-600">{{ s.summary.filled_count|default(0) }}</td>
+                            <td class="px-4 py-3 text-center text-slate-500">{{ s.summary.blank_count|default(0) }}</td>
+                            <td class="px-4 py-3 text-center font-bold {% if s.summary.ambiguous_count > 0 %}text-amber-600{% else %}text-slate-400{% endif %}">
+                                {{ s.summary.ambiguous_count|default(0) }}
+                            </td>
+                            <td class="px-4 py-3 text-center font-mono text-slate-600">{{ s.processing_time_ms|default(0) }} ms</td>
+                            <td class="px-4 py-3 text-right space-x-2">
+                                {% if s.summary and s.summary.ambiguous_count > 0 %}
+                                <a href="/review/{{ s.image_id }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200">
+                                    Review
+                                </a>
+                                {% endif %}
+                                <a href="/processing/{{ s.image_id }}" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200">
+                                    ดูผล
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <p>ยังไม่มีข้อมูลในระบบ</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if data %}
+<script>
+    // Grading Client-side Handler
+    document.getElementById("btn-grade")?.addEventListener("click", async () => {
+        const rawKey = document.getElementById("answer-key-input").value.trim();
+        if (!rawKey) {
+            alert("กรุณากรอกเฉลยคำตอบ");
+            return;
+        }
+
+        // Parse format e.g. "1:A, 2:B, 3:C"
+        const answerKey = {};
+        rawKey.split(",").forEach(pair => {
+            const parts = pair.split(":");
+            if (parts.length === 2) {
+                const q = parts[0].trim();
+                const a = parts[1].trim().toUpperCase();
+                if (q && a) answerKey[q] = a;
+            }
+        });
+
+        if (Object.keys(answerKey).length === 0) {
+            alert("รูปแบบเฉลยไม่ถูกต้อง ตัวอย่างที่ถูกต้อง: 1:A, 2:B, 3:C");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/results/{{ image_id }}/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answer_key: answerKey })
+            });
+
+            if (!res.ok) throw new Error("การคำนวณคะแนนล้มเหลว");
+
+            const scoreData = await res.json();
+            document.getElementById("score-number").textContent = scoreData.score_obtained;
+            document.getElementById("score-total").textContent = scoreData.total_key_questions;
+            document.getElementById("score-badge").textContent = `${scoreData.score_percentage}%`;
+            document.getElementById("stat-correct").textContent = scoreData.correct_count;
+            document.getElementById("stat-incorrect").textContent = scoreData.incorrect_count;
+            document.getElementById("stat-unattempted").textContent = scoreData.unattempted_count;
+
+            document.getElementById("score-card").classList.remove("hidden");
+        } catch (err) {
+            alert("เกิดข้อผิดพลาด: " + err.message);
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

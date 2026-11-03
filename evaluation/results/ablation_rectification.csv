@@ -1,0 +1,4 @@
+Sample_ID,Homography_Error_px,HoughDeskew_Error_px,Error_Reduction_Pct
+sample_01,0.0,55.21,100.0
+sample_02,0.0,49.68,100.0
+sample_03,0.0,49.66,100.0

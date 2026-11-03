@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Robust Pencil OMR{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Hero Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 text-white p-8 sm:p-10 shadow-xl">
+        <div class="relative z-10 max-w-3xl space-y-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md border border-white/20 text-blue-100">
+                <i class="fa-solid fa-microchip"></i> ICE415 Digital Image Processing Project
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">ระบบตรวจกระดาษคำตอบฝนดินสอ OMR</h1>
+            <p class="text-blue-100 text-base sm:text-lg leading-relaxed">
+                ออกแบบสำหรับภาพถ่ายจากกล้องสมาร์ตโฟนในสภาพแวดล้อมจริง ทนต่อเงา มุมเอียง รอยลบไม่สะอาด พร้อมนวัตกรรม
+                <strong class="text-white underline decoration-amber-400 decoration-2 underline-offset-4">Tri-State Decision Logic</strong> คัดแยกข้อที่กำกวมให้มนุษย์ตรวจทานแบบ Real-Time
+            </p>
+            <div class="pt-2 flex flex-wrap gap-3">
+                <a href="/upload" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-blue-800 shadow-md hover:bg-blue-50 transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-camera mr-2 text-blue-600"></i>เริ่มตรวจข้อสอบ (Upload / Scan)
+                </a>
+                <a href="/templates/answer_sheet_a4.pdf" target="_blank" class="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-medium bg-white/15 backdrop-blur-md text-white border border-white/20 hover:bg-white/25 transition-all">
+                    <i class="fa-solid fa-file-pdf mr-2"></i>ดาวน์โหลดแบบฟอร์ม A4
+                </a>
+            </div>
+        </div>
+        <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-file-circle-check"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">กระดาษคำตอบที่ตรวจแล้ว</p>
+                <h3 class="text-2xl font-bold text-slate-800" id="stat-total-sessions">{{ sessions|length }} แผ่น</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">อัตราการส่งตรวจทานเฉลี่ย</p>
+                <h3 class="text-2xl font-bold text-slate-800">8.5%</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">ความแม่นยำ (Baseline)</p>
+                <h3 class="text-2xl font-bold text-slate-800">97.8%</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">ความเร็วในการตรวจ</p>
+                <h3 class="text-2xl font-bold text-slate-800">&lt; 1.5 วินาที/แผ่น</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Section: Recent Sheets & Technical Pipeline -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Recent Processed Sheets -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">กระดาษคำตอบล่าสุด (Recent Activity)</h2>
+                    <p class="text-xs text-slate-500">ประวัติการตรวจข้อสอบและสถานะการตรวจสอบของมนุษย์</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    {% if sessions and sessions|length > 0 %}
+                    <button onclick="clearAllSessions()" class="text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg border border-rose-200 transition-colors flex items-center">
+                        <i class="fa-regular fa-trash-can mr-1"></i> ล้างประวัติทั้งหมด
+                    </button>
+                    {% endif %}
+                    <a href="/upload" class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center">
+                        + ตรวจเพิ่ม <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="p-6 flex-1">
+                {% if sessions and sessions|length > 0 %}
+                <div class="divide-y divide-slate-100">
+                    {% for s in sessions %}
+                    <div class="py-4 flex items-center justify-between gap-4" id="session-row-{{ s.image_id }}">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
+                                <i class="fa-regular fa-file-lines text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 truncate">Session: {{ s.image_id }}</p>
+                                <p class="text-xs text-slate-500">
+                                    ตรวจเมื่อ: {{ s.modified_at|default('ล่าสุด') }} • ใช้เวลา {{ s.processing_time_ms|default(120) }} ms
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2 flex-shrink-0">
+                            {% if s.summary and s.summary.ambiguous_count > 0 %}
+                            <a href="/review/{{ s.image_id }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors flex items-center">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i>รอตรวจ {{ s.summary.ambiguous_count }} ข้อ
+                            </a>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                ✓ ตรวจครบแล้ว
+                            </span>
+                            {% endif %}
+
+                            <a href="/processing/{{ s.image_id }}" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                                ดูผลตรวจ
+                            </a>
+
+                            <button onclick="deleteSession('{{ s.image_id }}')" title="ลบรายการนี้" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                                <i class="fa-regular fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-12 space-y-3">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-2xl">
+                        <i class="fa-regular fa-folder-open"></i>
+                    </div>
+                    <p class="text-slate-600 font-medium">ยังไม่มีประวัติการตรวจข้อสอบ</p>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto">เริ่มอัปโหลดภาพถ่ายกระดาษคำตอบแรก เพื่อให้ระบบประมวลผล 7-Step Pipeline อัตโนมัติ</p>
+                    <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white shadow-sm hover:bg-blue-700">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>อัปโหลดกระดาษคำตอบแผ่นแรก
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 7-Step Pipeline Summary Sidecard -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800">7-Step OMR Pipeline</h2>
+                <p class="text-xs text-slate-500">สถาปัตยกรรมการประมวลผลภาพดิจิทัล (ICE415)</p>
+            </div>
+
+            <ol class="relative border-l border-slate-200 ml-3 space-y-4 text-xs">
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 1: Blur & Exposure Check</h4>
+                    <p class="text-slate-500 mt-0.5">Laplacian Variance & Histogram Dynamic Range</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 2: Document Boundary</h4>
+                    <p class="text-slate-500 mt-0.5">Canny + Douglas-Peucker & 4 Fiducials Fallback</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 3: Perspective Homography</h4>
+                    <p class="text-slate-500 mt-0.5">3D Warping สู่ Canonical Canvas A4 (2480×3508)</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 4: Adaptive & Morphology</h4>
+                    <p class="text-slate-500 mt-0.5">Local Gaussian Thresholding + Closing & Opening</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 5: Grid & Inner Masking</h4>
+                    <p class="text-slate-500 mt-0.5">Concentric Mask (R=0.82) ตัดขอบพิมพ์ & เช็ค Glare</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-blue-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 6: Tri-State Engine</h4>
+                    <p class="text-slate-500 mt-0.5">ตัดสิน 3 สถานะ: ฝน (Filled), ว่าง (Blank), กำกวม (Ambiguous)</p>
+                </li>
+                <li class="ml-4">
+                    <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-emerald-600 border border-white"></div>
+                    <h4 class="font-bold text-slate-800">Step 7: Human-in-the-Loop UI</h4>
+                    <p class="text-slate-500 mt-0.5">Diagnostic Overlay & คิวตรวจทาน 1 คลิก</p>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+async function deleteSession(imageId) {
+    if (!confirm(`คุณต้องการลบผลการตรวจรหัส ${imageId} นี้ใช่หรือไม่?`)) return;
+    try {
+        const res = await fetch(`/api/process/${imageId}`, { method: 'DELETE' });
+        if (res.ok) {
+            const row = document.getElementById(`session-row-${imageId}`);
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transition = 'opacity 0.25s ease';
+                setTimeout(() => window.location.reload(), 250);
+            } else {
+                window.location.reload();
+            }
+        } else {
+            alert('ไม่สามารถลบรายการได้');
+        }
+    } catch (err) {
+        alert('เกิดข้อผิดพลาดในการลบ: ' + err.message);
+    }
+}
+
+async function clearAllSessions() {
+    if (!confirm('คุณต้องการลบประวัติการตรวจข้อสอบทั้งหมดใช่หรือไม่? (การกระทำนี้ไม่สามารถย้อนกลับได้)')) return;
+    try {
+        const res = await fetch('/api/process/sessions/clear-all', { method: 'POST' });
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            alert('ไม่สามารถล้างประวัติได้');
+        }
+    } catch (err) {
+        alert('เกิดข้อผิดพลาด: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

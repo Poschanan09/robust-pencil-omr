@@ -1,0 +1,5 @@
+Method,Condition,Accuracy,Ambiguous_Count
+Without Morphology (Raw),Clean Sheet,100.0,0
+With Morphology (Closing+Opening),Clean Sheet,100.0,0
+Without Morphology (Raw),Eraser Debris & Dust,100.0,0
+With Morphology (Closing+Opening),Eraser Debris & Dust,100.0,0

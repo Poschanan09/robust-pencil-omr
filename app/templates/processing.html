@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Result - {{ image_id }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Breadcrumb & Top Controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
+                <a href="/" class="hover:text-blue-600">Dashboard</a>
+                <span>/</span>
+                <span class="font-mono text-slate-700 font-semibold">{{ image_id }}</span>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                ผลการประมวลผลกระดาษคำตอบ
+                {% if data and data.status == 'success' %}
+                <span class="text-xs px-2.5 py-1 font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <i class="fa-solid fa-circle-check mr-1"></i>ประมวลผลสำเร็จ
+                </span>
+                {% else %}
+                <span class="text-xs px-2.5 py-1 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                    <i class="fa-solid fa-circle-xmark mr-1"></i>ถูกปฏิเสธ (Rejected)
+                </span>
+                {% endif %}
+            </h1>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/api/results/{{ image_id }}/export/csv" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
+                <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600 text-sm"></i>Export CSV
+            </a>
+            <a href="/api/results/{{ image_id }}/export/json" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
+                <i class="fa-solid fa-file-code mr-1.5 text-blue-600 text-sm"></i>Export JSON
+            </a>
+            <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-sm">
+                <i class="fa-solid fa-plus mr-1.5"></i>ตรวจแผ่นใหม่
+            </a>
+        </div>
+    </div>
+
+    {% if data and data.status == 'success' %}
+    <!-- Summary Metrics Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-medium">ข้อสอบทั้งหมด</p>
+            <p class="text-xl font-bold text-slate-800 mt-1">{{ data.summary.total_questions }} ข้อ</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-medium">ฝนชัดเจน (Filled)</p>
+            <p class="text-xl font-bold text-emerald-600 mt-1">{{ data.summary.filled_count }} ข้อ</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-medium">เว้นว่าง (Blank)</p>
+            <p class="text-xl font-bold text-slate-600 mt-1">{{ data.summary.blank_count }} ข้อ</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500 font-medium">กำกวม (Ambiguous)</p>
+            <p class="text-xl font-bold text-amber-600 mt-1">{{ data.summary.ambiguous_count }} ข้อ</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+            <p class="text-xs text-slate-500 font-medium">เวลาประมวลผล</p>
+            <p class="text-xl font-bold text-blue-600 mt-1">{{ data.processing_time_ms }} ms</p>
+        </div>
+    </div>
+
+    <!-- Ambiguous Banner Callout if review needed -->
+    {% if data.summary.ambiguous_count > 0 %}
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-amber-900">มีข้อสอบ {{ data.summary.ambiguous_count }} ข้อ ที่หลักฐานไม่ชัดเจน (ส่งเข้าคิว Review)</h3>
+                <p class="text-xs text-amber-700 mt-0.5">
+                    ข้อที่ตรวจพบ: {{ data.summary.ambiguous_questions|join(', ') }} (เช่น รอยลบไม่สะอาด, ฝนจาง หรือแสงสะท้อนผงดินสอ)
+                </p>
+            </div>
+        </div>
+        <a href="/review/{{ image_id }}" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md hover:shadow-lg transition-all flex items-center space-x-2 flex-shrink-0">
+            <i class="fa-solid fa-user-check"></i>
+            <span>เปิดหน้าตรวจทานทันที (Human Review)</span>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Pipeline Step-by-Step Visualization Tabs -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+            <div>
+                <h2 class="text-base font-bold text-slate-800">การแสดงผลภาพในแต่ละขั้นตอน (Step-by-Step Visuals)</h2>
+                <p class="text-xs text-slate-500">คลิกเลือกดูภาพการประมวลผลจาก Step 1 ถึง Step 7</p>
+            </div>
+            <!-- Tabs -->
+            <div class="flex space-x-1 bg-slate-200/70 p-1 rounded-xl text-xs font-semibold" id="visual-tabs">
+                <button class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 tab-btn" data-target="img-overlay">
+                    1. Overlay ตรวจคำตอบ
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-binary">
+                    2. Binary Mask (Adaptive)
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-warped">
+                    3. Warped A4 (Homography)
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-edges">
+                    4. Canny Edges
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-original">
+                    5. ภาพถ่ายต้นฉบับ
+                </button>
+            </div>
+        </div>
+
+        <!-- Image Display Viewport -->
+        <div class="p-6 bg-slate-900/5 flex items-center justify-center min-h-[480px] max-h-[720px] overflow-auto">
+            <img id="img-overlay" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
+            <img id="img-binary" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
+            <img id="img-warped" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
+            <img id="img-edges" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
+            <img id="img-original" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
+        </div>
+    </div>
+
+    <!-- Detailed Question Classification Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+            <h2 class="text-base font-bold text-slate-800">ตารางผลการจำแนกคำตอบ 50 ข้อ (Classification Matrix)</h2>
+            <p class="text-xs text-slate-500">แสดงผลการตัดสินใจ ค่า Fill-Ratio รายตัวเลือก และ Contrast Margin (ΔF)</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3">ข้อที่</th>
+                        <th class="px-4 py-3">สถานะ (Status)</th>
+                        <th class="px-4 py-3 text-center">คำตอบ (Answer)</th>
+                        <th class="px-4 py-3">ความเชื่อมั่น</th>
+                        <th class="px-4 py-3">Fill-Ratios (A, B, C, D, E)</th>
+                        <th class="px-4 py-3 text-center">ΔF (Margin)</th>
+                        <th class="px-4 py-3">การวิเคราะห์ / เหตุผล</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for q in data.results %}
+                    <tr class="hover:bg-slate-50/80 transition-colors {% if q.status == 'AMBIGUOUS' %}bg-amber-50/40{% endif %}">
+                        <td class="px-4 py-3 font-bold text-slate-800">{{ q.question }}</td>
+                        <td class="px-4 py-3">
+                            {% if q.status == 'FILLED' %}
+                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                ✓ FILLED
+                            </span>
+                            {% elif q.status == 'AMBIGUOUS' %}
+                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-amber-100 text-amber-800 border border-amber-200">
+                                ⚠️ AMBIGUOUS
+                            </span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-slate-100 text-slate-600 border border-slate-200">
+                                BLANK
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {% if q.answer %}
+                            <span class="w-7 h-7 rounded-full inline-flex items-center justify-center font-bold bg-blue-600 text-white shadow-sm">
+                                {{ q.answer }}
+                            </span>
+                            {% else %}
+                            <span class="text-slate-400 font-mono">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 font-semibold text-slate-600">{{ q.confidence }}</td>
+                        <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">
+                            {% for opt_key, opt_val in q.fill_ratios.items() %}
+                            {{ opt_key }}:{{ (opt_val * 100)|round|int }}%{% if not loop.last %} | {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="px-4 py-3 text-center font-mono font-bold text-slate-700">
+                            {{ q.delta_f }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 max-w-xs truncate" title="{{ q.reason }}">
+                            {{ q.reason }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <!-- Rejection Alert Card -->
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center space-y-4 shadow-sm">
+        <div class="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+        <h2 class="text-xl font-bold text-red-900">ระบบปฏิเสธการประมวลผล (Image Rejected)</h2>
+        <p class="text-sm text-red-700 max-w-md mx-auto">
+            {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ') }}
+        </p>
+        <div class="pt-2">
+            <a href="/upload" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white shadow-sm hover:bg-red-700">
+                <i class="fa-solid fa-arrow-rotate-left mr-2"></i>ถ่ายภาพใหม่
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Tab switcher logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                b.classList.add('text-slate-600');
+            });
+            btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+            btn.classList.remove('text-slate-600');
+
+            const targetId = btn.getAttribute('data-target');
+            document.querySelectorAll('.visual-view').forEach(img => img.classList.add('hidden'));
+            const targetImg = document.getElementById(targetId);
+            if (targetImg) targetImg.classList.remove('hidden');
+        });
+    });
+</script>
+{% endblock %}

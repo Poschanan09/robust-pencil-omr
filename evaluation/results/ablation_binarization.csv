@@ -1,0 +1,5 @@
+Method,Condition,Accuracy,Ambiguous_Count,Total_Questions
+Adaptive Gaussian (Proposed),Uniform Lighting,100.0,0,50
+Global Otsu (Baseline),Uniform Lighting,100.0,0,50
+Adaptive Gaussian (Proposed),Diagonal Shadow,100.0,0,50
+Global Otsu (Baseline),Diagonal Shadow,100.0,0,50

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Human-in-the-Loop Review - {{ image_id }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6" id="review-container" data-image-id="{{ image_id }}">
+    <!-- Top Progress Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
+            <span class="flex items-center">
+                <i class="fa-solid fa-user-check mr-2 text-blue-600"></i>
+                <span id="queue-status-text">กำลังโหลดรายการตรวจทาน...</span>
+            </span>
+            <span id="queue-percent-text" class="font-mono text-blue-600">0%</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+            <div id="queue-progress-bar" class="bg-gradient-to-r from-blue-600 to-amber-500 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+        </div>
+    </div>
+
+    <!-- Active Review Question Card -->
+    <div id="review-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <!-- Question Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center font-bold text-xl" id="q-badge">
+                    Q#
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800" id="q-title">ข้อที่ --</h2>
+                    <p class="text-xs text-amber-700 font-medium mt-0.5" id="q-reason">เหตุผลที่กำกวม...</p>
+                </div>
+            </div>
+
+            <!-- Tentative AI Guess Badge -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs text-slate-600 self-start sm:self-auto">
+                <span>ระบบคาดเดา: </span>
+                <strong id="q-ai-guess" class="text-blue-600 font-bold font-mono text-sm">—</strong>
+            </div>
+        </div>
+
+        <!-- Zoomed Comparison Viewport -->
+        <div class="space-y-2">
+            <p class="text-xs font-semibold text-slate-600 flex items-center">
+                <i class="fa-solid fa-magnifying-glass mr-1.5 text-blue-600"></i>
+                ภาพขยายเปรียบเทียบรอยฝนจริง (Original vs Binary Mask):
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Original ROI -->
+                <div class="bg-slate-900/5 rounded-xl border border-slate-200 p-3 text-center space-y-2">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block">1. ภาพต้นฉบับ (Original Grayscale)</span>
+                    <div class="h-28 flex items-center justify-center bg-white rounded-lg border border-slate-200 overflow-hidden">
+                        <img id="roi-original" class="max-h-full object-contain" src="" alt="Original ROI">
+                    </div>
+                </div>
+
+                <!-- Binary Mask ROI -->
+                <div class="bg-slate-900/5 rounded-xl border border-slate-200 p-3 text-center space-y-2">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block">2. ไบนารีมาสก์ (หลังทำ Morphology)</span>
+                    <div class="h-28 flex items-center justify-center bg-black rounded-lg border border-slate-700 overflow-hidden">
+                        <img id="roi-binary" class="max-h-full object-contain" src="" alt="Binary ROI">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fill-Ratios Breakdown -->
+        <div class="space-y-2 bg-slate-50 rounded-xl p-4 border border-slate-200">
+            <span class="text-xs font-semibold text-slate-700 block">สัดส่วนความหนาแน่นรอยฝน (Fill-Ratio Metric):</span>
+            <div class="grid grid-cols-5 gap-2 text-center text-xs" id="fill-ratios-container">
+                <!-- Populated dynamically by JS -->
+            </div>
+        </div>
+
+        <!-- One-Click Decision Buttons -->
+        <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+                <span class="font-semibold text-slate-700">กดยืนยันคำตอบของนักเรียนใน 1 คลิก:</span>
+                <span class="hidden sm:inline">กดปุ่มบนคีย์บอร์ด <span class="kbd-badge">1</span>–<span class="kbd-badge">5</span>, <span class="kbd-badge">0</span> หรือ <span class="kbd-badge">S</span></span>
+            </div>
+
+            <div class="grid grid-cols-3 sm:grid-cols-7 gap-2.5">
+                <button class="decision-btn py-3 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="A">
+                    <span>A</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[1]</span>
+                </button>
+                <button class="decision-btn py-3 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="B">
+                    <span>B</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[2]</span>
+                </button>
+                <button class="decision-btn py-3 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="C">
+                    <span>C</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[3]</span>
+                </button>
+                <button class="decision-btn py-3 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="D">
+                    <span>D</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[4]</span>
+                </button>
+                <button class="decision-btn py-3 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="E">
+                    <span>E</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[5]</span>
+                </button>
+                <button class="decision-btn py-3 rounded-xl font-bold text-xs bg-slate-600 hover:bg-slate-700 text-white shadow-sm flex flex-col items-center justify-center" data-choice="Blank">
+                    <span>เว้นว่าง</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[0]</span>
+                </button>
+                <button id="btn-skip" class="py-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-sm flex flex-col items-center justify-center col-span-3 sm:col-span-1">
+                    <span>ข้าม</span>
+                    <span class="text-[10px] font-normal opacity-75 mt-0.5 sm:hidden">[S]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Finished Celebration Card (Initially Hidden) -->
+    <div id="finish-card" class="hidden bg-white rounded-2xl border border-slate-200 shadow-xl p-10 text-center space-y-5">
+        <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mx-auto shadow-md">
+            <i class="fa-solid fa-check-double"></i>
+        </div>
+        <div class="space-y-1">
+            <h2 class="text-2xl font-bold text-slate-800">ตรวจทานข้อกำกวมครบถ้วนแล้ว!</h2>
+            <p class="text-sm text-slate-500">ผลการตัดสินใจของคุณได้รับการบันทึกลงระบบเรียบร้อยแล้ว</p>
+        </div>
+        <div class="pt-3 flex flex-wrap justify-center gap-3">
+            <a href="/processing/{{ image_id }}" class="px-6 py-3 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                <i class="fa-solid fa-file-lines mr-2"></i>ดูผลคะแนนฉบับสมบูรณ์
+            </a>
+            <a href="/upload" class="px-5 py-3 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">
+                ตรวจกระดาษคำตอบแผ่นถัดไป
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/review.js"></script>
+{% endblock %}
