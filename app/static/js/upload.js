@@ -112,8 +112,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (!uploadRes.ok) {
-                const errData = await uploadRes.json();
-                throw new Error(errData.detail || "การอัปโหลดไฟล์ล้มเหลว");
+                let errMsg = "การอัปโหลดไฟล์ล้มเหลว";
+                try {
+                    const errData = await uploadRes.json();
+                    errMsg = errData.detail || errMsg;
+                } catch (e) {
+                    const raw = await uploadRes.text();
+                    errMsg = raw || errMsg;
+                }
+                throw new Error(errMsg);
             }
 
             const uploadData = await uploadRes.json();
@@ -133,8 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (!procRes.ok) {
-                const errData = await procRes.json();
-                throw new Error(errData.detail || "การประมวลผลล้มเหลว");
+                let errMsg = "การประมวลผลล้มเหลว";
+                try {
+                    const errData = await procRes.json();
+                    errMsg = errData.detail || errMsg;
+                } catch (e) {
+                    const raw = await procRes.text();
+                    errMsg = raw || errMsg;
+                }
+                throw new Error(errMsg);
             }
 
             const procData = await procRes.json();

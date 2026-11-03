@@ -15,6 +15,29 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _make_serializable(obj: Any) -> Any:
+    """Recursively convert NumPy data types and objects to standard JSON-serializable types."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+        return float(obj)
+    if isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    if isinstance(obj, dict):
+        clean_dict = {}
+        for k, v in obj.items():
+            # Skip heavy image arrays from the saved JSON file
+            if isinstance(v, np.ndarray) and k in ["edge_map", "debug_image", "binary_clean", "warped_image", "raw_image"]:
+                continue
+            clean_dict[k] = _make_serializable(v)
+        return clean_dict
+    if isinstance(obj, (list, tuple)):
+        return [_make_serializable(item) for item in obj]
+    return obj
+
+
 class SessionStorage:
     """Manages file storage, intermediate debug images, and JSON results for processed sheets."""
 
@@ -102,8 +125,9 @@ class SessionStorage:
         serializable["ambiguous_patch_records"] = patch_records
         
         json_path = s_dir / "result.json"
+        clean_serializable = _make_serializable(serializable)
         with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(serializable, f, indent=2, ensure_ascii=False)
+            json.dump(clean_serializable, f, indent=2, ensure_ascii=False, default=str)
             
         return json_path
 

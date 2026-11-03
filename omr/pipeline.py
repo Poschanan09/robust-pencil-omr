@@ -109,9 +109,19 @@ class OMRPipeline:
                     "rejection_reason": f"FILE_NOT_FOUND: {img_path}",
                     "processing_time_ms": round((time.perf_counter() - start_time) * 1000, 2)
                 }
-            # Windows unicode safe load
-            data = np.fromfile(str(img_path), dtype=np.uint8)
-            raw_image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            # Load with PIL + ImageOps.exif_transpose to automatically respect mobile camera orientation
+            try:
+                from PIL import Image, ImageOps
+                with Image.open(str(img_path)) as pil_img:
+                    pil_img = ImageOps.exif_transpose(pil_img)
+                    if pil_img.mode != "RGB":
+                        pil_img = pil_img.convert("RGB")
+                    raw_image = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+            except Exception:
+                # Fallback to standard numpy fromfile + imdecode
+                data = np.fromfile(str(img_path), dtype=np.uint8)
+                raw_image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+
             if raw_image is None:
                 return {
                     "status": "rejected",
@@ -219,12 +229,25 @@ class OMRPipeline:
             # [Step 2] Document Boundary Detection
             doc_res = find_document(raw_image)
             corners = doc_res["corners"]
+            
+            # If portrait detection failed, check if image is a 90-degree rotated landscape sheet
             if corners is None or doc_res["method"] == "failed":
+                rotated_attempt = cv2.rotate(raw_image, cv2.ROTATE_90_CLOCKWISE)
+                h_rot, w_rot = rotated_attempt.shape[:2]
+                if (w_rot / h_rot) > 1.25:
+                    # Retry pipeline with rotated image
+                    return self.process_single_image(rotated_attempt, output_debug_dir=output_debug_dir, save_debug_images=save_debug_images)
+
                 return {
                     "status": "rejected",
                     "rejection_reason": "DOCUMENT_DETECTION_FAILED: Could not locate 4 document corners",
                     "quality": quality_res,
-                    "document": doc_res,
+                    "document": {
+                        "corners": None,
+                        "method": doc_res.get("method", "failed"),
+                        "contour_area": doc_res.get("contour_area")
+                    },
+                    "recommendation": "กรุณาถ่ายภาพกระดาษคำตอบให้เห็นขอบกระดาษครบทั้ง 4 มุมบนพื้นผิวที่มีสีตัดกันชัดเจน",
                     "processing_time_ms": round((time.perf_counter() - start_time) * 1000, 2)
                 }
 

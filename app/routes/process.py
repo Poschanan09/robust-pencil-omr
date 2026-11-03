@@ -41,42 +41,50 @@ async def process_image_endpoint(
         delta_min: Minimum contrast margin required.
         use_morphology: Whether to apply Mathematical Morphology (Closing & Opening).
     """
-    s_dir = SessionStorage.get_session_dir(image_id)
-    if not s_dir:
-        raise HTTPException(status_code=404, detail=f"Session '{image_id}' not found.")
+    try:
+        s_dir = SessionStorage.get_session_dir(image_id)
+        if not s_dir:
+            raise HTTPException(status_code=404, detail=f"Session '{image_id}' not found.")
+            
+        # Locate original image
+        candidates = list(s_dir.glob("original.*"))
+        if not candidates:
+            raise HTTPException(status_code=404, detail=f"Original image for '{image_id}' missing.")
+        orig_path = candidates[0]
         
-    # Locate original image
-    candidates = list(s_dir.glob("original.*"))
-    if not candidates:
-        raise HTTPException(status_code=404, detail=f"Original image for '{image_id}' missing.")
-    orig_path = candidates[0]
-    
-    # Initialize pipeline with specified thresholds if different from defaults
-    pipeline = OMRPipeline(
-        t_low=t_low,
-        t_high=t_high,
-        delta_min=delta_min,
-        use_morphology=use_morphology
-    )
-    
-    result = pipeline.process_single_image(orig_path)
-    # Save results to session directory
-    SessionStorage.save_result(image_id, result)
-    
-    return {
-        "image_id": image_id,
-        "status": result["status"],
-        "rejection_reason": result.get("rejection_reason"),
-        "summary": result.get("summary"),
-        "processing_time_ms": result.get("processing_time_ms"),
-        "debug_urls": {
-            "original": f"/api/process/{image_id}/debug/original",
-            "edges": f"/api/process/{image_id}/debug/edges",
-            "warped": f"/api/process/{image_id}/debug/warped",
-            "binary": f"/api/process/{image_id}/debug/binary",
-            "overlay": f"/api/process/{image_id}/debug/overlay"
+        # Initialize pipeline with specified thresholds if different from defaults
+        pipeline = OMRPipeline(
+            t_low=t_low,
+            t_high=t_high,
+            delta_min=delta_min,
+            use_morphology=use_morphology
+        )
+        
+        result = pipeline.process_single_image(orig_path)
+        # Save results to session directory
+        SessionStorage.save_result(image_id, result)
+        
+        return {
+            "image_id": image_id,
+            "status": result["status"],
+            "rejection_reason": result.get("rejection_reason"),
+            "summary": result.get("summary"),
+            "processing_time_ms": result.get("processing_time_ms"),
+            "debug_urls": {
+                "original": f"/api/process/{image_id}/debug/original",
+                "edges": f"/api/process/{image_id}/debug/edges",
+                "warped": f"/api/process/{image_id}/debug/warped",
+                "binary": f"/api/process/{image_id}/debug/binary",
+                "overlay": f"/api/process/{image_id}/debug/overlay"
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        err_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"[ERROR in process_image_endpoint]: {err_msg}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Processing failed: {err_msg}")
 
 
 @router.get("/{image_id}/status")
