@@ -64,8 +64,9 @@ def build_template_coordinates():
 
     # Questions layout
     # 50 Questions: Col 1 = Q1-25, Col 2 = Q26-50
-    start_y = 66.0
-    row_height = 8.1
+    # start_y set to 70.0mm so header labels (NO. A B C D E at 61.5mm) have generous breathing room above circle tops (66.8mm)
+    start_y = 70.0
+    row_height = 7.8
     bubble_radius_mm = 3.2
 
     col1_q_x = 30.0
@@ -200,31 +201,31 @@ def generate_pdf(config: dict, output_path: Path):
 
     # 5. Instructions & Exam Policy Bar
     pdf.set_fill_color(240, 240, 240)
-    pdf.rect(30, 52, 150, 7, style="FD")
+    pdf.rect(30, 50.5, 150, 6.5, style="FD")
     pdf.set_font("Helvetica", "I", 7.5)
     pdf.set_text_color(40, 40, 40)
-    pdf.set_xy(30, 53.5)
+    pdf.set_xy(30, 51.8)
     pdf.cell(150, 4, "Instructions: Fill the oval completely with 2B pencil. Erase cleanly if changing. Do not fold or smudge.", align="C")
     pdf.set_text_color(0, 0, 0)
 
     # 6. Column Divider Line
     pdf.set_line_width(0.4)
-    pdf.line(105, 63, 105, 271)
+    pdf.line(105, 59.5, 105, 265)
 
-    # 7. Column Header Labels
+    # 7. Column Header Labels (Clear gap between 61.5mm and row 1 bubbles at 66.8mm)
     pdf.set_font("Helvetica", "B", 8)
     # Column 1 header
-    pdf.set_xy(30, 61.5)
+    pdf.set_xy(30, 61.0)
     pdf.cell(8, 4, "NO.", align="C")
     for opt, x in [("A", 43.0), ("B", 53.0), ("C", 63.0), ("D", 73.0), ("E", 83.0)]:
-        pdf.set_xy(x - 3.2, 61.5)
+        pdf.set_xy(x - 3.2, 61.0)
         pdf.cell(6.4, 4, opt, align="C")
 
     # Column 2 header
-    pdf.set_xy(124, 61.5)
+    pdf.set_xy(124, 61.0)
     pdf.cell(8, 4, "NO.", align="C")
     for opt, x in [("A", 137.0), ("B", 147.0), ("C", 157.0), ("D", 167.0), ("E", 177.0)]:
-        pdf.set_xy(x - 3.2, 61.5)
+        pdf.set_xy(x - 3.2, 61.0)
         pdf.cell(6.4, 4, opt, align="C")
 
     # 8. Questions and Bubbles
@@ -322,23 +323,23 @@ def generate_png_canvas(config: dict, output_path: Path):
     draw.line([nm_x0 + 15, nm_y1 - 25, nm_x1 - 15, nm_y1 - 25], fill="black", width=2)
 
     # Instructions Banner
-    ib_x0, ib_y0 = mm_to_px(30, True), mm_to_px(52, False)
-    ib_x1, ib_y1 = mm_to_px(180, True), mm_to_px(59, False)
+    ib_x0, ib_y0 = mm_to_px(30, True), mm_to_px(50.5, False)
+    ib_x1, ib_y1 = mm_to_px(180, True), mm_to_px(57.0, False)
     draw.rectangle([ib_x0, ib_y0, ib_x1, ib_y1], fill="#eeeeee", outline="black", width=2)
     draw.text((CANVAS_WIDTH_PX // 2, (ib_y0 + ib_y1) // 2), "Instructions: Fill the oval completely with 2B pencil. Erase cleanly if changing.", fill="black", font=font_inst, anchor="mm")
 
     # Column divider line
     div_x = mm_to_px(105, True)
-    draw.line([div_x, mm_to_px(63, False), div_x, mm_to_px(271, False)], fill="black", width=4)
+    draw.line([div_x, mm_to_px(59.5, False), div_x, mm_to_px(265, False)], fill="black", width=4)
 
-    # Headers for columns
-    draw.text((mm_to_px(30, True), mm_to_px(63.5, False)), "NO.", fill="black", font=font_q, anchor="mm")
+    # Headers for columns (Clean spacing above row 1 circles at 70mm)
+    draw.text((mm_to_px(30, True), mm_to_px(62.5, False)), "NO.", fill="black", font=font_q, anchor="mm")
     for opt, cx_mm in [("A", 43.0), ("B", 53.0), ("C", 63.0), ("D", 73.0), ("E", 83.0)]:
-        draw.text((mm_to_px(cx_mm, True), mm_to_px(63.5, False)), opt, fill="black", font=font_q, anchor="mm")
+        draw.text((mm_to_px(cx_mm, True), mm_to_px(62.5, False)), opt, fill="black", font=font_q, anchor="mm")
 
-    draw.text((mm_to_px(124, True), mm_to_px(63.5, False)), "NO.", fill="black", font=font_q, anchor="mm")
+    draw.text((mm_to_px(124, True), mm_to_px(62.5, False)), "NO.", fill="black", font=font_q, anchor="mm")
     for opt, cx_mm in [("A", 137.0), ("B", 147.0), ("C", 157.0), ("D", 167.0), ("E", 177.0)]:
-        draw.text((mm_to_px(cx_mm, True), mm_to_px(63.5, False)), opt, fill="black", font=font_q, anchor="mm")
+        draw.text((mm_to_px(cx_mm, True), mm_to_px(62.5, False)), opt, fill="black", font=font_q, anchor="mm")
 
     # Questions & Bubbles
     for q in config["questions"]:
