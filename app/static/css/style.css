@@ -1,56 +1,239 @@
-/* Styles for Robust Pencil OMR Web UI */
+/* ==========================================================================
+   Sketch Design System — Robust Pencil OMR
+   ========================================================================== */
 
-/* Subtle Targeted Transitions */
-a, button {
-    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+:root {
+    --dp-color-ground: #f7f2e7;
+    --dp-color-ink: #38352f;
+    --dp-color-ink-muted: #514d44;
+    --dp-color-line: #b3ac9d;
+    --dp-color-accent: #9e3a2e;       /* Red teacher grading pen */
+    --dp-color-annotation: #344c69;   /* Blue ballpoint pen */
+    --dp-color-highlight: #f0dfa0;    /* Pale yellow highlighter */
+    --dp-color-scrap: #fcf8ef;        /* Paper scrap */
+    --dp-typography-reading-face: 'Mali', 'Sarabun', -apple-system, cursive, sans-serif;
+    --dp-typography-display-face: 'Kalam', 'Mali', cursive;
+    --dp-radius-control: 9px 4px 17px 5px / 4px 12px 5px 9px;
+    --dp-border-fine-stroke: 1.5px;
+    --dp-motion-control: 100ms;
 }
 
-/* Numeric alignment */
+body {
+    background-color: var(--dp-color-ground);
+    color: var(--dp-color-ink);
+    font-family: var(--dp-typography-reading-face);
+    background-image: 
+        radial-gradient(var(--dp-color-line) 0.5px, transparent 0.5px),
+        radial-gradient(var(--dp-color-line) 0.5px, var(--dp-color-ground) 0.5px);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+    background-attachment: fixed;
+}
+
+/* Typography styles */
+.font-hand-display {
+    font-family: var(--dp-typography-display-face);
+}
+.font-hand-reading {
+    font-family: var(--dp-typography-reading-face);
+}
+
+/* Paper Sheet / Working Card */
+.sketch-sheet {
+    background-color: var(--dp-color-scrap);
+    border: var(--dp-border-fine-stroke) solid var(--dp-color-line);
+    border-radius: 12px 6px 14px 5px / 5px 14px 6px 12px;
+    box-shadow: 2px 3px 0 rgba(56, 53, 47, 0.12);
+    position: relative;
+}
+
+.sketch-scrap {
+    background-color: #ffffff;
+    border: 1.5px solid var(--dp-color-line);
+    border-radius: 8px 4px 12px 5px / 4px 10px 5px 8px;
+    box-shadow: 2px 2px 0 rgba(56, 53, 47, 0.08);
+}
+
+/* Washi Tape Accent */
+.tape-top {
+    position: relative;
+}
+.tape-top::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    width: 80px;
+    height: 20px;
+    background-color: rgba(240, 223, 160, 0.75);
+    border-left: 2px dashed rgba(179, 172, 157, 0.5);
+    border-right: 2px dashed rgba(179, 172, 157, 0.5);
+    box-shadow: 0 1px 2px rgba(56, 53, 47, 0.08);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Sketched Buttons */
+.btn-sketch-red {
+    background-color: var(--dp-color-accent);
+    color: #ffffff;
+    border: 1.5px solid var(--dp-color-ink);
+    border-radius: var(--dp-radius-control);
+    box-shadow: 2px 3px 0 var(--dp-color-ink);
+    font-family: var(--dp-typography-display-face);
+    transition: transform var(--dp-motion-control) ease, box-shadow var(--dp-motion-control) ease;
+}
+.btn-sketch-red:hover {
+    transform: translate(-1px, -1px) rotate(-0.5deg);
+    box-shadow: 3px 4px 0 var(--dp-color-ink);
+}
+.btn-sketch-red:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 1px 0 var(--dp-color-ink);
+}
+
+.btn-sketch-blue {
+    background-color: var(--dp-color-annotation);
+    color: #ffffff;
+    border: 1.5px solid var(--dp-color-ink);
+    border-radius: var(--dp-radius-control);
+    box-shadow: 2px 3px 0 var(--dp-color-ink);
+    font-family: var(--dp-typography-display-face);
+    transition: transform var(--dp-motion-control) ease, box-shadow var(--dp-motion-control) ease;
+}
+.btn-sketch-blue:hover {
+    transform: translate(-1px, -1px) rotate(0.5deg);
+    box-shadow: 3px 4px 0 var(--dp-color-ink);
+}
+.btn-sketch-blue:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 1px 0 var(--dp-color-ink);
+}
+
+.btn-sketch-paper {
+    background-color: var(--dp-color-scrap);
+    color: var(--dp-color-ink);
+    border: 1.5px solid var(--dp-color-ink);
+    border-radius: 7px 14px 5px 12px / 12px 5px 14px 6px;
+    box-shadow: 2px 2px 0 var(--dp-color-ink);
+    font-family: var(--dp-typography-display-face);
+    transition: transform var(--dp-motion-control) ease, box-shadow var(--dp-motion-control) ease;
+}
+.btn-sketch-paper:hover {
+    background-color: #ffffff;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--dp-color-ink);
+}
+.btn-sketch-paper:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--dp-color-ink);
+}
+
+/* Focus State */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px dashed var(--dp-color-annotation) !important;
+    outline-offset: 3px !important;
+}
+
+/* Yellow Highlighter Effect */
+.sketch-highlight {
+    background: linear-gradient(104deg, rgba(240, 223, 160, 0.2) 0.9%, rgba(240, 223, 160, 0.95) 2.4%, rgba(240, 223, 160, 0.85) 96%, rgba(240, 223, 160, 0.2) 98.5%);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    display: inline;
+}
+
+/* Red Hand-Drawn Underline */
+.sketch-underline-red {
+    background-image: linear-gradient(to right, var(--dp-color-accent) 0%, var(--dp-color-accent) 100%);
+    background-repeat: repeat-x;
+    background-size: 100% 2.5px;
+    background-position: 0 95%;
+    padding-bottom: 2px;
+}
+
+/* Hand-Drawn Brackets & Notes */
+.sketch-note-blue {
+    color: var(--dp-color-annotation);
+    font-family: var(--dp-typography-display-face);
+}
+.sketch-note-red {
+    color: var(--dp-color-accent);
+    font-family: var(--dp-typography-display-face);
+}
+
+/* Sketched Dropzone */
+.sketch-dropzone {
+    border: 2px dashed var(--dp-color-line);
+    border-radius: 14px 6px 12px 8px / 8px 12px 6px 14px;
+    background-color: rgba(252, 248, 239, 0.8);
+    transition: border-color var(--dp-motion-control) ease, background-color var(--dp-motion-control) ease;
+}
+.sketch-dropzone.dragover {
+    border-color: var(--dp-color-accent) !important;
+    background-color: rgba(240, 223, 160, 0.3) !important;
+}
+
+/* Sketched Keycap */
+.kbd-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 5px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--dp-color-ink);
+    background-color: var(--dp-color-scrap);
+    border: 1.5px solid var(--dp-color-ink);
+    border-radius: 4px;
+    box-shadow: 1px 1.5px 0 var(--dp-color-ink);
+}
+
+/* Status Stamps */
+.stamp-filled {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1.5px solid #22c55e;
+    border-radius: 6px 4px 7px 5px;
+    font-family: 'JetBrains Mono', monospace;
+}
+.stamp-ambiguous {
+    background-color: #fffbeb;
+    color: #9a3412;
+    border: 1.5px solid #f59e0b;
+    border-radius: 5px 7px 4px 6px;
+    font-family: 'JetBrains Mono', monospace;
+}
+.stamp-blank {
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1.5px solid var(--dp-color-line);
+    border-radius: 6px 5px 6px 5px;
+    font-family: 'JetBrains Mono', monospace;
+}
+.stamp-rejected {
+    background-color: #fef2f2;
+    color: var(--dp-color-accent);
+    border: 1.5px solid var(--dp-color-accent);
+    border-radius: 5px 6px 4px 7px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Tabular Numbers */
 .tabular-nums {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
 }
 
-/* Dropzone States */
-.dropzone {
-    transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.dropzone.dragover {
-    border-color: #0f172a !important;
-    background-color: #f8fafc !important;
-}
-
-/* Quiet Status Badges */
-.badge-filled {
-    background-color: #f0fdf4;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
-}
-.badge-ambiguous {
-    background-color: #fffbeb;
-    color: #b45309;
-    border: 1px solid #fde68a;
-}
-.badge-blank {
-    background-color: #f8fafc;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-}
-
-/* Precision Keyboard Shortcut Keycap */
-.kbd-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 4px;
-    font-size: 11px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-    line-height: 1;
-    color: #334155;
-    background-color: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        transform: none !important;
+    }
 }

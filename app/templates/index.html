@@ -3,104 +3,150 @@
 {% block title %}Dashboard - Robust Pencil OMR{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Hero Banner (Quiet, Confident, Academic) -->
-    <div class="rounded-xl bg-slate-900 text-white p-6 sm:p-8 border border-slate-800">
+<div class="space-y-7">
+    <!-- Hero Banner (Working Sheet / Sketch Opening) -->
+    <div class="sketch-sheet tape-top p-6 sm:p-9 relative">
         <div class="max-w-2xl space-y-3">
-            <div class="inline-flex items-center gap-2 text-[11px] font-mono text-slate-400">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>ICE415 Digital Image Processing · Department of Computer Engineering</span>
+            <div class="inline-flex items-center gap-2 text-xs font-mono text-annotation font-semibold">
+                <span>[ ICE415 Lab Sheet ]</span>
+                <span>•</span>
+                <span>Department of Computer Engineering, KMUTT</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-white">ระบบตรวจกระดาษคำตอบฝนดินสอ OMR</h1>
-            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                ประมวลผลภาพถ่ายกระดาษคำตอบจากกล้องสมาร์ตโฟน ทนทานต่อการบิดเบือนมุมมอง แสงเงาที่ไม่สม่ำเสมอ และรอยลบดินสอ 
-                ด้วยสถาปัตยกรรม Classical DIP 100% พร้อม Tri-State Decision Logic สำหรับคัดแยกข้อกำกวมเข้าสู่คิวตรวจทาน
+            
+            <h1 class="text-2xl sm:text-3xl font-display font-bold tracking-wide text-ink">
+                ระบบตรวจกระดาษคำตอบฝนดินสอ 2B
+                <span class="block text-accent text-xl sm:text-2xl mt-1">
+                    <span class="sketch-underline-red">Robust Classical DIP</span> + Tri-State Logic
+                </span>
+            </h1>
+            
+            <p class="text-ink-muted text-sm sm:text-base leading-relaxed font-sans">
+                ประมวลผลภาพถ่ายกระดาษคำตอบจากกล้องสมาร์ตโฟน ชดเชยมุมเอียง (Homography) แก้ไขเงาไม่สม่ำเสมอ (Adaptive Gaussian) 
+                และตรวจจับข้อกำกวมจากรอยลบไม่สะอาดด้วย Dual-Threshold &Delta;F Chow Rejection ก่อนส่งเข้าคิวตรวจทาน
             </p>
-            <div class="pt-2 flex flex-wrap items-center gap-2.5">
-                <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-md text-xs font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-colors">
-                    <i class="fa-solid fa-camera mr-1.5 text-slate-700"></i>อัปโหลดหรือถ่ายภาพกระดาษคำตอบ
+            
+            <div class="pt-3 flex flex-wrap items-center gap-3">
+                <a href="/upload" class="btn-sketch-red px-5 py-2.5 text-sm inline-flex items-center">
+                    <i class="fa-solid fa-camera mr-2 text-xs"></i>
+                    <span>เริ่มอัปโหลด & ตรวจกระดาษคำตอบ</span>
+                    <span class="ml-2 font-mono text-xs opacity-90">&rarr;</span>
                 </a>
-                <a href="/templates/answer_sheet_a4.pdf" target="_blank" class="inline-flex items-center px-3.5 py-2 rounded-md text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:bg-slate-800 transition-colors">
-                    <i class="fa-regular fa-file-pdf mr-1.5 text-slate-400"></i>ดาวน์โหลดแบบฟอร์ม A4 (PDF)
+                <a href="/templates/answer_sheet_a4.pdf" target="_blank" class="btn-sketch-paper px-4 py-2.5 text-xs inline-flex items-center">
+                    <i class="fa-regular fa-file-pdf mr-1.5 text-accent"></i>ดาวน์โหลดแบบฟอร์ม A4 (PDF)
                 </a>
+            </div>
+        </div>
+
+        <!-- Hand-drawn style note card floating on wide screens -->
+        <div class="hidden lg:block absolute top-8 right-8 w-52 p-4 bg-scrap border-2 border-line rounded-lg shadow-[3px_3px_0_#b3ac9d] rotate-2">
+            <div class="text-[11px] font-mono font-bold text-accent uppercase tracking-wider mb-1">
+                ✎ Teacher's Note
+            </div>
+            <p class="text-xs text-ink-muted leading-snug">
+                "ใช้ดินสอ 2B ฝนให้เต็มวง หากลบไม่เกลี้ยง ระบบจะแยกเข้าคิว Review ทันที!"
+            </p>
+            <div class="mt-2 text-[10px] font-mono text-annotation text-right">
+                #ICE415-Lab-DIP
             </div>
         </div>
     </div>
 
-    <!-- Technical Specification & Metrics Bar -->
-    <div class="bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-        <div class="p-4 sm:p-5">
-            <p class="text-xs text-slate-500 font-medium">กระดาษคำตอบในระบบ</p>
-            <p class="text-xl font-semibold text-slate-900 font-mono mt-1 tabular-nums" id="stat-total-sessions">{{ sessions|length }} <span class="text-xs text-slate-500 font-sans font-normal">แผ่น</span></p>
+    <!-- 4 Facts / Metrics Sketched Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Fact 1 -->
+        <div class="sketch-scrap p-4 sm:p-5 flex flex-col justify-between">
+            <span class="text-xs font-display font-bold text-ink-muted block">กระดาษคำตอบในระบบ</span>
+            <div class="text-2xl sm:text-3xl font-display font-bold text-ink mt-1 tabular-nums" id="stat-total-sessions">
+                {{ sessions|length }} <span class="text-xs font-sans font-normal text-ink-muted">แผ่น</span>
+            </div>
+            <div class="text-[11px] font-mono text-annotation mt-1">/sessions archive</div>
         </div>
-        <div class="p-4 sm:p-5">
-            <p class="text-xs text-slate-500 font-medium">อัตราส่งตรวจทานเฉลี่ย (HITL)</p>
-            <p class="text-xl font-semibold text-slate-900 font-mono mt-1 tabular-nums">3.08% <span class="text-xs text-slate-500 font-sans font-normal">&lt;1 ข้อ/แผ่น</span></p>
+
+        <!-- Fact 2 -->
+        <div class="sketch-scrap p-4 sm:p-5 flex flex-col justify-between">
+            <span class="text-xs font-display font-bold text-ink-muted block">อัตราส่งตรวจทาน (HITL)</span>
+            <div class="text-2xl sm:text-3xl font-mono font-bold text-annotation mt-1 tabular-nums">
+                3.08%
+            </div>
+            <div class="text-[11px] font-mono text-ink-muted mt-1">&lt;1 ข้อต่อ 1 แผ่นตรวจ</div>
         </div>
-        <div class="p-4 sm:p-5">
-            <p class="text-xs text-slate-500 font-medium">ความแม่นยำรวม (Kaggle Benchmark)</p>
-            <p class="text-xl font-semibold text-emerald-700 font-mono mt-1 tabular-nums">98.21% <span class="text-xs text-slate-500 font-sans font-normal">4,272 / 4,350</span></p>
+
+        <!-- Fact 3 -->
+        <div class="sketch-scrap p-4 sm:p-5 flex flex-col justify-between">
+            <span class="text-xs font-display font-bold text-ink-muted block">Benchmark Accuracy</span>
+            <div class="text-2xl sm:text-3xl font-mono font-bold text-accent mt-1 tabular-nums">
+                <span class="sketch-highlight">98.21%</span>
+            </div>
+            <div class="text-[11px] font-mono text-ink-muted mt-1">4,272 / 4,350 ข้อทดสอบ</div>
         </div>
-        <div class="p-4 sm:p-5">
-            <p class="text-xs text-slate-500 font-medium">หลักการประมวลผล</p>
-            <p class="text-xs font-semibold text-slate-900 font-mono mt-2">100% Classical DIP <span class="text-slate-400 font-normal">· Zero DL</span></p>
+
+        <!-- Fact 4 -->
+        <div class="sketch-scrap p-4 sm:p-5 flex flex-col justify-between">
+            <span class="text-xs font-display font-bold text-ink-muted block">หลักการประมวลผล</span>
+            <div class="text-sm sm:text-base font-display font-bold text-ink mt-2">
+                100% Classical DIP
+            </div>
+            <div class="text-[11px] font-mono text-accent font-bold mt-1">✓ Zero Deep Learning</div>
         </div>
     </div>
 
     <!-- Main Section: Recent Sheets & Technical Pipeline -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Recent Processed Sheets -->
-        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 flex flex-col">
-            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <!-- Recent Processed Sheets (Ruled Ledger) -->
+        <div class="lg:col-span-2 sketch-sheet p-5 sm:p-6 flex flex-col">
+            <div class="border-b-2 border-line/60 pb-3 flex items-center justify-between">
                 <div>
-                    <h2 class="text-sm font-semibold text-slate-900">กระดาษคำตอบล่าสุด</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">ประวัติการตรวจข้อสอบและสถานะผลการวิเคราะห์</p>
+                    <h2 class="text-base font-display font-bold text-ink flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-accent"></i>
+                        <span>รายการกระดาษคำตอบล่าสุด</span>
+                    </h2>
+                    <p class="text-xs text-ink-muted">ประวัติการตรวจข้อสอบและสถานะการจำแนกคำตอบ</p>
                 </div>
                 <div class="flex items-center space-x-2">
                     {% if sessions and sessions|length > 0 %}
-                    <button onclick="clearAllSessions()" class="text-xs text-slate-500 hover:text-rose-600 hover:bg-slate-50 px-2.5 py-1 rounded border border-slate-200 transition-colors">
+                    <button onclick="clearAllSessions()" class="text-xs font-mono font-bold text-accent hover:underline px-2 py-1">
                         ล้างประวัติ
                     </button>
                     {% endif %}
-                    <a href="/upload" class="text-xs font-medium text-slate-700 hover:text-slate-900 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 transition-colors">
+                    <a href="/upload" class="btn-sketch-paper text-xs px-2.5 py-1 inline-flex items-center">
                         + ตรวจแผ่นใหม่
                     </a>
                 </div>
             </div>
 
-            <div class="p-5 flex-1">
+            <div class="pt-3 flex-1">
                 {% if sessions and sessions|length > 0 %}
-                <div class="divide-y divide-slate-100">
+                <div class="divide-y divide-line/40">
                     {% for s in sessions %}
-                    <div class="py-3.5 flex items-center justify-between gap-4" id="session-row-{{ s.image_id }}">
+                    <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3" id="session-row-{{ s.image_id }}">
                         <div class="flex items-center space-x-3 min-w-0">
-                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600 flex-shrink-0 text-xs font-mono">
-                                #{{ loop.index }}
+                            <div class="w-7 h-7 rounded border border-ink bg-ground flex items-center justify-center text-ink text-xs font-mono font-bold shadow-[1px_1px_0_#38352f]">
+                                {{ loop.index }}
                             </div>
                             <div class="min-w-0">
-                                <p class="text-xs font-semibold text-slate-900 font-mono truncate">{{ s.image_id }}</p>
-                                <p class="text-[11px] text-slate-500 tabular-nums">
+                                <p class="text-xs font-mono font-bold text-ink truncate">{{ s.image_id }}</p>
+                                <p class="text-[11px] font-mono text-ink-muted">
                                     {{ s.modified_at|default('ล่าสุด') }} · {{ s.processing_time_ms|default(120) }} ms
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center space-x-2 flex-shrink-0 text-xs">
+                        <div class="flex items-center space-x-2 text-xs">
                             {% if s.summary and s.summary.ambiguous_count > 0 %}
-                            <a href="/review/{{ s.image_id }}" class="px-2.5 py-1 rounded font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors">
-                                ตรวจทาน {{ s.summary.ambiguous_count }} ข้อ
+                            <a href="/review/{{ s.image_id }}" class="px-2.5 py-1 rounded text-xs font-display font-bold bg-highlight/80 text-ink border border-ink shadow-[1px_1px_0_#38352f] hover:bg-highlight">
+                                ⚠️ ตรวจทาน {{ s.summary.ambiguous_count }} ข้อ
                             </a>
                             {% else %}
-                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 text-slate-600 border border-slate-200">
-                                ตรวจสมบูรณ์
+                            <span class="px-2 py-0.5 rounded text-[11px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-300">
+                                ✓ ตรวจสมบูรณ์
                             </span>
                             {% endif %}
 
-                            <a href="/processing/{{ s.image_id }}" class="px-2.5 py-1 rounded font-medium bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">
-                                ดูรายงาน
+                            <a href="/processing/{{ s.image_id }}" class="btn-sketch-paper px-2.5 py-1 text-xs">
+                                ดูผล
                             </a>
 
-                            <button onclick="deleteSession('{{ s.image_id }}')" title="ลบรายการนี้" class="p-1 text-slate-400 hover:text-rose-600 transition-colors">
+                            <button onclick="deleteSession('{{ s.image_id }}')" title="ลบรายการนี้" class="p-1 text-ink-muted hover:text-accent">
                                 <i class="fa-regular fa-trash-can text-xs"></i>
                             </button>
                         </div>
@@ -108,11 +154,11 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="text-center py-10 space-y-2">
-                    <p class="text-slate-600 text-xs font-medium">ยังไม่มีประวัติการตรวจข้อสอบ</p>
-                    <p class="text-[11px] text-slate-400 max-w-xs mx-auto">อัปโหลดภาพถ่ายกระดาษคำตอบแรกเพื่อเริ่มต้นประมวลผลด้วย 7-Step Pipeline</p>
+                <div class="text-center py-12 space-y-2">
+                    <p class="text-ink font-display font-bold text-sm">ยังไม่มีข้อมูลกระดาษคำตอบในระบบ</p>
+                    <p class="text-xs text-ink-muted max-w-xs mx-auto">อัปโหลดภาพถ่ายกระดาษคำตอบแผ่นแรกเพื่อเริ่มทดสอบการตรวจข้อสอบ</p>
                     <div class="pt-2">
-                        <a href="/upload" class="inline-flex items-center px-3.5 py-1.5 rounded-md text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                        <a href="/upload" class="btn-sketch-red px-4 py-2 text-xs inline-flex items-center">
                             อัปโหลดกระดาษคำตอบ
                         </a>
                     </div>
@@ -121,48 +167,50 @@
             </div>
         </div>
 
-        <!-- 7-Step Pipeline Summary Sidecard -->
-        <div class="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-            <div>
-                <h2 class="text-sm font-semibold text-slate-900">7-Step OMR Pipeline</h2>
-                <p class="text-xs text-slate-500 mt-0.5">กระบวนการประมวลผลภาพดิจิทัลตามหลักสูตร ICE415</p>
+        <!-- 7-Step Pipeline Process Strip -->
+        <div class="sketch-sheet p-5 sm:p-6 space-y-4">
+            <div class="border-b-2 border-line/60 pb-3">
+                <h2 class="text-base font-display font-bold text-ink">
+                    7-Step OMR Pipeline
+                </h2>
+                <p class="text-xs text-ink-muted">กระบวนการประมวลผลภาพดิจิทัลตามหลักสูตร ICE415</p>
             </div>
 
-            <ol class="space-y-3 text-xs border-l border-slate-200 ml-2.5 pl-3.5 font-sans">
+            <ol class="space-y-3 text-xs border-l-2 border-dashed border-line ml-2 pl-3.5">
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 01</span>
-                    <p class="font-medium text-slate-900">Input Quality Gateway</p>
-                    <p class="text-[11px] text-slate-500">Laplacian Variance $\ge 100$ & Exposure Analysis</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 01</span>
+                    <p class="font-display font-bold text-ink text-sm">Input Quality Gateway</p>
+                    <p class="text-[11px] text-ink-muted">Laplacian Variance &ge; 100 & Exposure Analysis</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 02</span>
-                    <p class="font-medium text-slate-900">Document Detection</p>
-                    <p class="text-[11px] text-slate-500">Canny Edge & Douglas-Peucker Approximation</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 02</span>
+                    <p class="font-display font-bold text-ink text-sm">Document Detection</p>
+                    <p class="text-[11px] text-ink-muted">Canny Edge + Douglas-Peucker Polygon Approximation</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 03</span>
-                    <p class="font-medium text-slate-900">Homography Rectification</p>
-                    <p class="text-[11px] text-slate-500">4-Point Projective Transform สู่ A4 300 DPI</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 03</span>
+                    <p class="font-display font-bold text-ink text-sm">Homography Rectification</p>
+                    <p class="text-[11px] text-ink-muted">4-Point Projective Transform สู่ขนาด A4 300 DPI</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 04</span>
-                    <p class="font-medium text-slate-900">Adaptive Segmentation</p>
-                    <p class="text-[11px] text-slate-500">Local Gaussian ($41 \times 41$) + Morphological Close/Open</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 04</span>
+                    <p class="font-display font-bold text-ink text-sm">Adaptive Segmentation</p>
+                    <p class="text-[11px] text-ink-muted">Local Gaussian (41x41) + Morphology Close/Open</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 05</span>
-                    <p class="font-medium text-slate-900">Concentric Inner Masking</p>
-                    <p class="text-[11px] text-slate-500">Inner Mask ($r = 0.82R$) ตัดขอบหมึก & ตรวจจับ Glare</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 05</span>
+                    <p class="font-display font-bold text-ink text-sm">Concentric Inner Masking</p>
+                    <p class="text-[11px] text-ink-muted">Inner Mask (r = 0.82R) ตัดขอบพิมพ์ &amp; กรองแสง Glare</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 06</span>
-                    <p class="font-medium text-slate-900">Tri-State Decision Engine</p>
-                    <p class="text-[11px] text-slate-500">Dual-threshold ($T_{\text{low}}, T_{\text{high}}, \Delta F$) Chow Rejection</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 06</span>
+                    <p class="font-display font-bold text-ink text-sm">Tri-State Decision Engine</p>
+                    <p class="text-[11px] text-ink-muted">Dual-threshold (T<sub>low</sub>, T<sub>high</sub>, &Delta;F) Chow Rejection</p>
                 </li>
                 <li>
-                    <span class="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">Step 07</span>
-                    <p class="font-medium text-slate-900">Human-in-the-Loop Review</p>
-                    <p class="text-[11px] text-slate-500">Interactive Web Interface & Keyboard Override</p>
+                    <span class="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">Step 07</span>
+                    <p class="font-display font-bold text-ink text-sm">Human-in-the-Loop Review</p>
+                    <p class="text-[11px] text-ink-muted">คิวตรวจทานข้อกำกวม 1 คลิกพร้อมคีย์ลัดคีย์บอร์ด</p>
                 </li>
             </ol>
         </div>

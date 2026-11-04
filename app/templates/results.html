@@ -6,75 +6,82 @@
 <div class="space-y-6">
     {% if data %}
     <!-- Single Sheet Detailed Report -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b-2 border-dashed border-line">
         <div>
-            <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
-                <a href="/" class="hover:text-slate-900 font-mono">/sessions</a>
+            <div class="flex items-center space-x-2 text-xs font-mono text-annotation mb-1">
+                <a href="/" class="hover:underline font-bold">/sessions</a>
                 <span>/</span>
-                <a href="/processing/{{ image_id }}" class="hover:text-slate-900 font-mono">{{ image_id }}</a>
+                <a href="/processing/{{ image_id }}" class="hover:underline font-bold">{{ image_id }}</a>
                 <span>/</span>
-                <span class="font-mono text-slate-800">scoring</span>
+                <span class="font-bold text-ink">scoring</span>
             </div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            <h1 class="text-2xl font-display font-bold text-ink">
                 รายงานผลคะแนนและการตรวจคำตอบ
             </h1>
         </div>
 
         <div class="flex items-center space-x-2">
-            <a href="/api/results/{{ image_id }}/export/csv" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                <i class="fa-solid fa-file-csv mr-1.5 text-slate-500"></i>CSV
+            <a href="/api/results/{{ image_id }}/export/csv" class="btn-sketch-paper text-xs px-3 py-1.5 inline-flex items-center">
+                <i class="fa-solid fa-file-csv mr-1.5 text-accent"></i>CSV
             </a>
-            <a href="/api/results/{{ image_id }}/export/json" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                <i class="fa-solid fa-file-code mr-1.5 text-slate-500"></i>JSON
+            <a href="/api/results/{{ image_id }}/export/json" class="btn-sketch-paper text-xs px-3 py-1.5 inline-flex items-center">
+                <i class="fa-solid fa-file-code mr-1.5 text-annotation"></i>JSON
             </a>
-            <a href="/processing/{{ image_id }}" class="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+            <a href="/processing/{{ image_id }}" class="btn-sketch-red text-xs px-3.5 py-1.5 inline-flex items-center">
                 <i class="fa-solid fa-images mr-1.5"></i>ดูภาพ Pipeline
             </a>
         </div>
     </div>
 
-    <!-- Auto-Grading with Answer Key Card -->
-    <div class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-            <h2 class="text-sm font-semibold text-slate-900 flex items-center">
-                <i class="fa-solid fa-graduation-cap mr-2 text-slate-600"></i>
-                ตรวจคำนวณคะแนนเทียบกับเฉลย (Answer Key Evaluation)
+    <!-- Auto-Grading with Answer Key Card (Teacher's Grade Sheet) -->
+    <div class="sketch-sheet tape-top p-6 sm:p-7 space-y-4">
+        <div class="border-b-2 border-line/60 pb-3">
+            <h2 class="text-base font-display font-bold text-ink flex items-center">
+                <i class="fa-solid fa-graduation-cap mr-2 text-accent"></i>
+                ตรวจคำนวณคะแนนเทียบกับเฉลย (Answer Key Grading)
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">ระบุคู่ข้อและคำตอบ เช่น <span class="font-mono text-slate-700">1:A, 2:B, 3:C, 4:D, 5:E</span> ระบบจะเปรียบเทียบคำตอบของแผ่นนี้ทันที</p>
+            <p class="text-xs text-ink-muted mt-0.5">ระบุคู่ข้อและคำตอบ เช่น <span class="font-mono font-bold text-ink">1:A, 2:B, 3:C, 4:D, 5:E</span> ระบบจะตัดเกรดคำนวณคะแนนทันที</p>
         </div>
 
         <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row gap-2">
-                <input type="text" id="answer-key-input" placeholder="ตัวอย่าง: 1:A, 2:B, 3:C, 4:D, 5:E (เว้นวรรคหรือไม่ก็ได้)" class="flex-1 px-3.5 py-2 rounded-lg border border-slate-300 text-xs font-mono focus:border-slate-800 focus:outline-none transition-colors">
-                <button id="btn-grade" class="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition-colors flex items-center justify-center space-x-1.5 flex-shrink-0">
+            <div class="flex flex-col sm:flex-row gap-2.5">
+                <input type="text" id="answer-key-input" placeholder="ตัวอย่าง: 1:A, 2:B, 3:C, 4:D, 5:E (เว้นวรรคหรือไม่ก็ได้)" class="flex-1 px-4 py-2.5 rounded border-2 border-ink bg-ground text-xs font-mono focus:border-accent focus:outline-none transition-colors shadow-[2px_2px_0_#38352f]">
+                <button id="btn-grade" class="btn-sketch-red px-5 py-2.5 text-xs font-display font-bold flex items-center justify-center space-x-1.5 flex-shrink-0">
                     <i class="fa-solid fa-calculator text-xs"></i>
                     <span>คำนวณคะแนน</span>
                 </button>
             </div>
 
-            <!-- Score Results Container (Initially Hidden) -->
-            <div id="score-card" class="hidden bg-slate-50 border border-slate-200 rounded-lg p-4 sm:p-5 space-y-4">
+            <!-- Score Results Container (Initially Hidden - Sketched Grade Stamp) -->
+            <div id="score-card" class="hidden sketch-scrap p-5 sm:p-6 space-y-4 border-2 border-accent bg-[#fffdf7]">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <span class="text-[11px] font-mono font-medium text-slate-500 uppercase tracking-wider">Score Result</span>
-                        <div class="flex items-baseline space-x-2 mt-1">
-                            <span id="score-number" class="text-3xl font-bold font-mono text-slate-900 tabular-nums">0</span>
-                            <span class="text-xs font-mono text-slate-500">/ <span id="score-total">50</span> คะแนน</span>
-                            <span id="score-badge" class="ml-2 px-2 py-0.5 rounded text-xs font-mono font-semibold bg-slate-200 text-slate-800 tabular-nums">0%</span>
+                    <div class="flex items-center space-x-4">
+                        <!-- Red Grade Stamp Circle -->
+                        <div class="w-20 h-20 rounded-full border-4 border-dashed border-accent flex flex-col items-center justify-center -rotate-6 text-accent">
+                            <span id="score-number" class="text-2xl font-display font-bold tabular-nums">0</span>
+                            <span class="text-[10px] font-mono border-t border-accent w-10 text-center">/ <span id="score-total">50</span></span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-display font-bold text-ink-muted uppercase tracking-wider block">คะแนนสอบที่ได้ (Total Score)</span>
+                            <div class="flex items-baseline space-x-2 mt-0.5">
+                                <span id="score-badge" class="sketch-highlight font-mono font-bold text-sm text-ink tabular-nums">0%</span>
+                                <span class="text-xs text-ink-muted font-sans">คิดเป็นร้อยละของข้อที่ตรวจ</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex space-x-5 text-xs border-t sm:border-t-0 sm:border-l border-slate-200 pt-3 sm:pt-0 sm:pl-5">
-                        <div>
-                            <span class="text-[11px] font-mono uppercase text-slate-500 block">Correct</span>
-                            <strong id="stat-correct" class="text-lg font-mono font-bold text-emerald-700 tabular-nums">0</strong>
+
+                    <div class="flex space-x-6 text-xs border-t-2 sm:border-t-0 sm:border-l-2 border-dashed border-line pt-3 sm:pt-0 sm:pl-6">
+                        <div class="text-center">
+                            <span class="text-ink-muted font-display font-bold block">ตอบถูก</span>
+                            <strong id="stat-correct" class="text-xl font-mono font-bold text-emerald-800 tabular-nums">0</strong>
                         </div>
-                        <div>
-                            <span class="text-[11px] font-mono uppercase text-slate-500 block">Incorrect</span>
-                            <strong id="stat-incorrect" class="text-lg font-mono font-bold text-red-600 tabular-nums">0</strong>
+                        <div class="text-center">
+                            <span class="text-ink-muted font-display font-bold block">ตอบผิด</span>
+                            <strong id="stat-incorrect" class="text-xl font-mono font-bold text-accent tabular-nums">0</strong>
                         </div>
-                        <div>
-                            <span class="text-[11px] font-mono uppercase text-slate-500 block">Unattempted</span>
-                            <strong id="stat-unattempted" class="text-lg font-mono font-bold text-slate-600 tabular-nums">0</strong>
+                        <div class="text-center">
+                            <span class="text-ink-muted font-display font-bold block">ไม่ตอบ</span>
+                            <strong id="stat-unattempted" class="text-xl font-mono font-bold text-ink-muted tabular-nums">0</strong>
                         </div>
                     </div>
                 </div>
@@ -82,78 +89,74 @@
         </div>
     </div>
 
-    <!-- Final Overlay Image Viewer -->
-    <div class="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+    <!-- Final Overlay Image Viewer (Mounted Photo Reference) -->
+    <div class="sketch-sheet p-5 space-y-3">
         <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-900">ภาพจำแนกผลการตรวจกระดาษคำตอบ (Diagnostic Overlay)</h2>
-            <a href="/api/process/{{ image_id }}/debug/overlay" target="_blank" class="text-xs font-mono text-slate-600 hover:text-slate-900 flex items-center">
-                <span>RAW OVERLAY</span>
+            <h2 class="text-base font-display font-bold text-ink">ภาพจำแนกผลการตรวจกระดาษคำตอบ (Diagnostic Overlay)</h2>
+            <a href="/api/process/{{ image_id }}/debug/overlay" target="_blank" class="text-xs font-mono text-accent hover:underline flex items-center font-bold">
+                <span>[ OPEN FULL IMAGE ]</span>
                 <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px]"></i>
             </a>
         </div>
-        <div class="bg-slate-950/5 rounded-lg p-4 flex items-center justify-center max-h-[600px] overflow-auto border border-slate-200">
-            <img src="/api/process/{{ image_id }}/debug/overlay" class="max-h-[560px] object-contain rounded border border-slate-200 bg-white" alt="Overlay Result">
+        <div class="bg-ground border-2 border-line rounded-lg p-4 flex items-center justify-center max-h-[600px] overflow-auto">
+            <img src="/api/process/{{ image_id }}/debug/overlay" class="max-h-[560px] object-contain rounded border-2 border-ink bg-white shadow-[3px_3px_0_#38352f]" alt="Overlay Result">
         </div>
     </div>
 
     {% else %}
-    <!-- All Sessions Overview Table -->
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden space-y-0">
-        <div class="px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/60">
+    <!-- All Sessions Overview Table (Ruled Ledger) -->
+    <div class="sketch-sheet p-5 sm:p-6 space-y-4">
+        <div class="border-b-2 border-line/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-base font-bold text-slate-900">รายการประมวลผลกระดาษคำตอบทั้งหมด (Session History)</h1>
-                <p class="text-xs text-slate-500">บันทึกประวัติการตรวจข้อสอบ สถิติคำตอบ และข้อที่ผ่านการ Review</p>
+                <h1 class="text-lg font-display font-bold text-ink">รายการประมวลผลกระดาษคำตอบทั้งหมด (Session History)</h1>
+                <p class="text-xs text-ink-muted">บันทึกประวัติการตรวจข้อสอบ สถิติคำตอบ และข้อที่ผ่านการตรวจทาน</p>
             </div>
-            <a href="/upload" class="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors self-start sm:self-auto">
+            <a href="/upload" class="btn-sketch-red text-xs px-3.5 py-1.5 inline-flex items-center self-start sm:self-auto">
                 <i class="fa-solid fa-plus mr-1.5"></i>ตรวจข้อสอบใหม่
             </a>
         </div>
 
-        <div class="p-0">
+        <div>
             {% if sessions and sessions|length > 0 %}
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-500 uppercase font-mono text-[11px] border-b border-slate-200">
+                <table class="w-full text-left text-xs font-sans">
+                    <thead class="bg-ground text-ink-muted uppercase font-mono text-[11px] border-b-2 border-line">
                         <tr>
-                            <th class="px-4 py-3 font-semibold">Session ID</th>
-                            <th class="px-4 py-3 font-semibold">สถานะ (Status)</th>
-                            <th class="px-4 py-3 font-semibold text-center">ข้อที่ฝน</th>
-                            <th class="px-4 py-3 font-semibold text-center">ข้อเว้นว่าง</th>
-                            <th class="px-4 py-3 font-semibold text-center">ข้อกำกวม</th>
-                            <th class="px-4 py-3 font-semibold text-center">เวลาประมวลผล</th>
-                            <th class="px-4 py-3 font-semibold text-right">การจัดการ</th>
+                            <th class="px-4 py-3 font-bold">Session ID</th>
+                            <th class="px-4 py-3 font-bold">สถานะ (Status)</th>
+                            <th class="px-4 py-3 font-bold text-center">ข้อที่ฝน</th>
+                            <th class="px-4 py-3 font-bold text-center">ข้อเว้นว่าง</th>
+                            <th class="px-4 py-3 font-bold text-center">ข้อกำกวม</th>
+                            <th class="px-4 py-3 font-bold text-center">เวลาประมวลผล</th>
+                            <th class="px-4 py-3 font-bold text-right">การจัดการ</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-line/40">
                         {% for s in sessions %}
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-4 py-3 font-mono font-medium text-slate-800">
-                                <a href="/processing/{{ s.image_id }}" class="hover:underline">{{ s.image_id }}</a>
+                        <tr class="hover:bg-highlight/20 transition-colors">
+                            <td class="px-4 py-3 font-mono font-bold text-ink">
+                                <a href="/processing/{{ s.image_id }}" class="hover:underline text-accent">{{ s.image_id }}</a>
                             </td>
                             <td class="px-4 py-3 font-mono text-[11px]">
                                 {% if s.status == 'success' %}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>SUCCESS
-                                </span>
+                                <span class="stamp-filled px-2 py-0.5 font-bold">✓ SUCCESS</span>
                                 {% else %}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium bg-red-50 text-red-800 border border-red-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>REJECTED
-                                </span>
+                                <span class="stamp-rejected px-2 py-0.5 font-bold">✗ REJECTED</span>
                                 {% endif %}
                             </td>
-                            <td class="px-4 py-3 text-center font-mono font-bold tabular-nums text-emerald-700">{{ s.summary.filled_count|default(0) }}</td>
-                            <td class="px-4 py-3 text-center font-mono tabular-nums text-slate-600">{{ s.summary.blank_count|default(0) }}</td>
-                            <td class="px-4 py-3 text-center font-mono tabular-nums font-bold {% if s.summary.ambiguous_count > 0 %}text-amber-700{% else %}text-slate-400{% endif %}">
+                            <td class="px-4 py-3 text-center font-mono font-bold tabular-nums text-emerald-800">{{ s.summary.filled_count|default(0) }}</td>
+                            <td class="px-4 py-3 text-center font-mono tabular-nums text-ink-muted">{{ s.summary.blank_count|default(0) }}</td>
+                            <td class="px-4 py-3 text-center font-mono tabular-nums font-bold {% if s.summary.ambiguous_count > 0 %}text-accent{% else %}text-line{% endif %}">
                                 {{ s.summary.ambiguous_count|default(0) }}
                             </td>
-                            <td class="px-4 py-3 text-center font-mono tabular-nums text-slate-700">{{ s.processing_time_ms|default(0) }} ms</td>
+                            <td class="px-4 py-3 text-center font-mono tabular-nums text-annotation">{{ s.processing_time_ms|default(0) }} ms</td>
                             <td class="px-4 py-3 text-right space-x-1.5">
                                 {% if s.summary and s.summary.ambiguous_count > 0 %}
-                                <a href="/review/{{ s.image_id }}" class="px-2.5 py-1 rounded text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors">
+                                <a href="/review/{{ s.image_id }}" class="px-2.5 py-1 rounded text-xs font-display font-bold bg-highlight text-ink border border-ink shadow-[1px_1px_0_#38352f] hover:bg-highlight/80">
                                     Review
                                 </a>
                                 {% endif %}
-                                <a href="/processing/{{ s.image_id }}" class="px-2.5 py-1 rounded text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors">
+                                <a href="/processing/{{ s.image_id }}" class="btn-sketch-paper px-2.5 py-1 text-xs">
                                     ดูผล
                                 </a>
                             </td>
@@ -163,7 +166,7 @@
                 </table>
             </div>
             {% else %}
-            <div class="text-center py-12 text-slate-400 font-mono text-xs">
+            <div class="text-center py-12 text-ink-muted font-display text-sm">
                 ไม่มีประวัติการประมวลผลในระบบ
             </div>
             {% endif %}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full bg-slate-50">
+<html lang="th" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,63 +8,79 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter & Sarabun -->
+    <!-- Google Fonts: Kalam, Mali, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Kalam:wght@400;700&family=Mali:wght@400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'Sarabun', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Consolas', 'Menlo', 'monospace']
+                        sans: ['Mali', 'Sarabun', '-apple-system', 'cursive', 'sans-serif'],
+                        display: ['Kalam', 'Mali', 'cursive'],
+                        mono: ['JetBrains Mono', 'Consolas', 'monospace']
                     },
                     colors: {
+                        ground: '#f7f2e7',
+                        ink: {
+                            DEFAULT: '#38352f',
+                            muted: '#514d44'
+                        },
+                        line: '#b3ac9d',
                         accent: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#172554'
-                        }
+                            DEFAULT: '#9e3a2e',
+                            hover: '#873226',
+                            light: '#fbf0ee'
+                        },
+                        annotation: {
+                            DEFAULT: '#344c69',
+                            hover: '#293d54',
+                            light: '#eef3f8'
+                        },
+                        highlight: '#f0dfa0',
+                        scrap: '#fcf8ef'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="h-full flex flex-col font-sans text-slate-800 antialiased bg-slate-50 selection:bg-slate-200">
-    <!-- Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+<body class="h-full flex flex-col font-sans text-ink antialiased selection:bg-highlight selection:text-ink">
+    <!-- Navigation Bar (Working Sheet Header) -->
+    <header class="bg-scrap border-b-2 border-line/70 sticky top-0 z-40 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="flex justify-between h-14 items-center">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Brand / Logo -->
                 <div class="flex items-center space-x-3">
-                    <a href="/" class="flex items-center space-x-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-                            <i class="fa-solid fa-square-check text-sm"></i>
+                    <a href="/" class="flex items-center space-x-2.5 group">
+                        <!-- Hand-sketched Logo Box -->
+                        <div class="w-9 h-9 rounded-md bg-scrap border-2 border-ink flex items-center justify-center text-accent shadow-[2px_2px_0_#38352f] group-hover:rotate-2 transition-transform">
+                            <i class="fa-solid fa-pencil text-base"></i>
                         </div>
                         <div class="flex items-baseline space-x-2">
-                            <span class="text-sm font-semibold tracking-tight text-slate-900">Robust Pencil OMR</span>
-                            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">KMUTT ICE415</span>
+                            <span class="text-lg font-bold font-display tracking-wide text-ink">Robust Pencil OMR</span>
+                            <span class="text-[11px] font-mono px-2 py-0.5 rounded border border-line bg-ground text-annotation font-semibold shadow-[1px_1px_0_#b3ac9d]">
+                                ICE415
+                            </span>
                         </div>
                     </a>
                 </div>
 
-                <nav class="flex items-center space-x-1 sm:space-x-1.5 text-xs font-medium">
-                    <a href="/" class="px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                <!-- Navigation Links -->
+                <nav class="flex items-center space-x-1 sm:space-x-2 text-sm font-display font-bold">
+                    <a href="/" class="px-3 py-1.5 rounded text-ink-muted hover:text-ink hover:bg-highlight/60 transition-colors">
                         Dashboard
                     </a>
-                    <a href="/upload" class="px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    <a href="/upload" class="px-3 py-1.5 rounded text-ink-muted hover:text-ink hover:bg-highlight/60 transition-colors">
                         Upload & Scan
                     </a>
-                    <a href="/results" class="px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    <a href="/results" class="px-3 py-1.5 rounded text-ink-muted hover:text-ink hover:bg-highlight/60 transition-colors">
                         All Results
                     </a>
-                    <a href="/download-template" download class="ml-2 inline-flex items-center px-3 py-1.5 rounded-md text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
-                        <i class="fa-regular fa-file-pdf mr-1.5 text-slate-500"></i>Download A4 Sheet
+                    <a href="/download-template" download class="ml-2 inline-flex items-center px-3.5 py-1.5 rounded text-xs font-mono font-bold bg-scrap text-ink border-2 border-ink shadow-[2px_2px_0_#38352f] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#38352f] transition-all">
+                        <i class="fa-solid fa-file-arrow-down mr-1.5 text-accent"></i>A4 Sheet PDF
                     </a>
                 </nav>
             </div>
@@ -77,19 +93,19 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-5 text-xs text-slate-500">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center space-x-2">
-                <span class="font-medium text-slate-700">ICE415 Digital Image Processing</span>
+    <footer class="border-t-2 border-dashed border-line/80 mt-auto py-6 text-xs text-ink-muted bg-scrap/60">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2 font-display text-sm">
+                <span class="font-bold text-accent">✎ ICE415 Digital Image Processing</span>
                 <span>•</span>
                 <span>Department of Computer Engineering, KMUTT</span>
             </div>
-            <div class="flex items-center space-x-3 text-slate-400 font-mono text-[11px]">
+            <div class="flex items-center space-x-3 text-annotation font-mono text-[11px]">
                 <span>100% Classical DIP</span>
                 <span>•</span>
-                <span>Tri-State Decision Logic</span>
+                <span>Dual-Threshold &Delta;F</span>
                 <span>•</span>
-                <span>FastAPI + OpenCV</span>
+                <span>OpenCV + FastAPI</span>
             </div>
         </div>
     </footer>
