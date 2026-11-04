@@ -76,10 +76,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const isTop = topTwo.includes(opt);
 
             const div = document.createElement("div");
-            div.className = `p-2 rounded-lg border ${isTop ? 'bg-amber-50 border-amber-300 font-bold' : 'bg-white border-slate-200'}`;
+            div.className = `p-2 rounded-md border text-center ${isTop ? 'bg-amber-50/70 border-amber-300 font-semibold text-amber-900' : 'bg-white border-slate-200 text-slate-700'}`;
             div.innerHTML = `
-                <div class="text-[11px] text-slate-500 font-semibold">${opt}</div>
-                <div class="text-sm ${isTop ? 'text-amber-800' : 'text-slate-700'}">${pct}%</div>
+                <div class="text-[11px] font-mono text-slate-500">${opt}</div>
+                <div class="text-xs font-mono font-bold tabular-nums mt-0.5">${pct}%</div>
             `;
             fillRatiosContainer.appendChild(div);
         });

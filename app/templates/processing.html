@@ -3,180 +3,192 @@
 {% block title %}Processing Result - {{ image_id }}{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="space-y-6">
     <!-- Breadcrumb & Top Controls -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
             <div class="flex items-center space-x-2 text-xs text-slate-500 mb-1">
-                <a href="/" class="hover:text-blue-600">Dashboard</a>
+                <a href="/" class="hover:text-slate-900 font-mono">/sessions</a>
                 <span>/</span>
-                <span class="font-mono text-slate-700 font-semibold">{{ image_id }}</span>
+                <span class="font-mono text-slate-800 font-medium">{{ image_id }}</span>
             </div>
-            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                ผลการประมวลผลกระดาษคำตอบ
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+                ผลการวิเคราะห์กระดาษคำตอบ
                 {% if data and data.status == 'success' %}
-                <span class="text-xs px-2.5 py-1 font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    <i class="fa-solid fa-circle-check mr-1"></i>ประมวลผลสำเร็จ
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-mono font-medium border border-emerald-200 bg-emerald-50 text-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>SUCCESS
                 </span>
                 {% else %}
-                <span class="text-xs px-2.5 py-1 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
-                    <i class="fa-solid fa-circle-xmark mr-1"></i>ถูกปฏิเสธ (Rejected)
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-mono font-medium border border-red-200 bg-red-50 text-red-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>REJECTED
                 </span>
                 {% endif %}
             </h1>
         </div>
 
-        <div class="flex items-center space-x-3">
-            <a href="/api/results/{{ image_id }}/export/csv" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
-                <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600 text-sm"></i>Export CSV
+        <div class="flex items-center space-x-2">
+            <a href="/api/results/{{ image_id }}/export/csv" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                <i class="fa-solid fa-file-csv mr-1.5 text-slate-500"></i>Export CSV
             </a>
-            <a href="/api/results/{{ image_id }}/export/json" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm">
-                <i class="fa-solid fa-file-code mr-1.5 text-blue-600 text-sm"></i>Export JSON
+            <a href="/api/results/{{ image_id }}/export/json" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                <i class="fa-solid fa-file-code mr-1.5 text-slate-500"></i>Export JSON
             </a>
-            <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-sm">
+            <a href="/upload" class="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors">
                 <i class="fa-solid fa-plus mr-1.5"></i>ตรวจแผ่นใหม่
             </a>
         </div>
     </div>
 
     {% if data and data.status == 'success' %}
-    <!-- Summary Metrics Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500 font-medium">ข้อสอบทั้งหมด</p>
-            <p class="text-xl font-bold text-slate-800 mt-1">{{ data.summary.total_questions }} ข้อ</p>
+    <!-- Summary Metrics Strip -->
+    <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+        <div class="pt-2 sm:pt-0 sm:px-3 first:pl-0">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 block">Total Questions</span>
+            <div class="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-1">
+                {{ data.summary.total_questions }} <span class="text-xs font-sans font-normal text-slate-500">ข้อ</span>
+            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500 font-medium">ฝนชัดเจน (Filled)</p>
-            <p class="text-xl font-bold text-emerald-600 mt-1">{{ data.summary.filled_count }} ข้อ</p>
+        <div class="pt-2 sm:pt-0 sm:px-3">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 block">Filled (ชัดเจน)</span>
+            <div class="text-2xl font-bold font-mono tabular-nums text-emerald-700 mt-1">
+                {{ data.summary.filled_count }} <span class="text-xs font-sans font-normal text-slate-500">ข้อ</span>
+            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500 font-medium">เว้นว่าง (Blank)</p>
-            <p class="text-xl font-bold text-slate-600 mt-1">{{ data.summary.blank_count }} ข้อ</p>
+        <div class="pt-2 sm:pt-0 sm:px-3">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 block">Blank (เว้นว่าง)</span>
+            <div class="text-2xl font-bold font-mono tabular-nums text-slate-600 mt-1">
+                {{ data.summary.blank_count }} <span class="text-xs font-sans font-normal text-slate-500">ข้อ</span>
+            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500 font-medium">กำกวม (Ambiguous)</p>
-            <p class="text-xl font-bold text-amber-600 mt-1">{{ data.summary.ambiguous_count }} ข้อ</p>
+        <div class="pt-2 sm:pt-0 sm:px-3">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 block">Ambiguous (กำกวม)</span>
+            <div class="text-2xl font-bold font-mono tabular-nums {% if data.summary.ambiguous_count > 0 %}text-amber-700{% else %}text-slate-400{% endif %} mt-1">
+                {{ data.summary.ambiguous_count }} <span class="text-xs font-sans font-normal text-slate-500">ข้อ</span>
+            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
-            <p class="text-xs text-slate-500 font-medium">เวลาประมวลผล</p>
-            <p class="text-xl font-bold text-blue-600 mt-1">{{ data.processing_time_ms }} ms</p>
+        <div class="pt-2 sm:pt-0 sm:px-3 col-span-2 sm:col-span-1">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 block">Execution Time</span>
+            <div class="text-2xl font-bold font-mono tabular-nums text-slate-900 mt-1">
+                {{ data.processing_time_ms }} <span class="text-xs font-mono font-normal text-slate-500">ms</span>
+            </div>
         </div>
     </div>
 
     <!-- Ambiguous Banner Callout if review needed -->
     {% if data.summary.ambiguous_count > 0 %}
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-md shadow-amber-500/20">
+    <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-start sm:items-center space-x-3.5">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 border border-amber-300/70 flex items-center justify-center text-sm flex-shrink-0 mt-0.5 sm:mt-0 font-mono font-bold">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-                <h3 class="text-base font-bold text-amber-900">มีข้อสอบ {{ data.summary.ambiguous_count }} ข้อ ที่หลักฐานไม่ชัดเจน (ส่งเข้าคิว Review)</h3>
-                <p class="text-xs text-amber-700 mt-0.5">
-                    ข้อที่ตรวจพบ: {{ data.summary.ambiguous_questions|join(', ') }} (เช่น รอยลบไม่สะอาด, ฝนจาง หรือแสงสะท้อนผงดินสอ)
+                <h3 class="text-sm font-semibold text-amber-950">
+                    พบข้อคำตอบกำกวม {{ data.summary.ambiguous_count }} ข้อ ที่เข้าเกณฑ์ Dual-Threshold
+                </h3>
+                <p class="text-xs text-amber-800/90 mt-0.5">
+                    ข้อที่ตรวจพบ: <span class="font-mono font-medium">{{ data.summary.ambiguous_questions|join(', ') }}</span> (เช่น รอยลบไม่เกลี้ยง, ฝนจาง หรือความเปรียบต่างต่ำกว่า &Delta;F)
                 </p>
             </div>
         </div>
-        <a href="/review/{{ image_id }}" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md hover:shadow-lg transition-all flex items-center space-x-2 flex-shrink-0">
-            <i class="fa-solid fa-user-check"></i>
-            <span>เปิดหน้าตรวจทานทันที (Human Review)</span>
+        <a href="/review/{{ image_id }}" class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-700 hover:bg-amber-800 text-white transition-colors flex items-center space-x-2 flex-shrink-0 self-stretch sm:self-auto justify-center">
+            <i class="fa-solid fa-user-check text-xs"></i>
+            <span>เปิดคิวตรวจทาน (Human Review)</span>
         </a>
     </div>
     {% endif %}
 
     <!-- Pipeline Step-by-Step Visualization Tabs -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60">
             <div>
-                <h2 class="text-base font-bold text-slate-800">การแสดงผลภาพในแต่ละขั้นตอน (Step-by-Step Visuals)</h2>
-                <p class="text-xs text-slate-500">คลิกเลือกดูภาพการประมวลผลจาก Step 1 ถึง Step 7</p>
+                <h2 class="text-sm font-semibold text-slate-900">การแสดงผลภาพแยกตามขั้นตอนประมวลผล (Pipeline Stages)</h2>
+                <p class="text-xs text-slate-500">เลือกดูภาพการทำงานทางคณิตศาสตร์จาก Step 1 ถึง Step 7</p>
             </div>
             <!-- Tabs -->
-            <div class="flex space-x-1 bg-slate-200/70 p-1 rounded-xl text-xs font-semibold" id="visual-tabs">
-                <button class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 tab-btn" data-target="img-overlay">
+            <div class="flex flex-wrap gap-1 bg-slate-200/60 p-1 rounded-lg text-xs font-mono" id="visual-tabs">
+                <button class="px-2.5 py-1 rounded bg-white shadow-sm text-slate-900 font-semibold tab-btn" data-target="img-overlay">
                     1. Overlay ตรวจคำตอบ
                 </button>
-                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-binary">
+                <button class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 tab-btn" data-target="img-binary">
                     2. Binary Mask (Adaptive)
                 </button>
-                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-warped">
+                <button class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 tab-btn" data-target="img-warped">
                     3. Warped A4 (Homography)
                 </button>
-                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-edges">
+                <button class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 tab-btn" data-target="img-edges">
                     4. Canny Edges
                 </button>
-                <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 tab-btn" data-target="img-original">
+                <button class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 tab-btn" data-target="img-original">
                     5. ภาพถ่ายต้นฉบับ
                 </button>
             </div>
         </div>
 
         <!-- Image Display Viewport -->
-        <div class="p-6 bg-slate-900/5 flex items-center justify-center min-h-[480px] max-h-[720px] overflow-auto">
-            <img id="img-overlay" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
-            <img id="img-binary" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
-            <img id="img-warped" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
-            <img id="img-edges" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
-            <img id="img-original" class="max-h-[680px] object-contain rounded-lg shadow-md border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
+        <div class="p-6 bg-slate-950/5 flex items-center justify-center min-h-[460px] max-h-[720px] overflow-auto">
+            <img id="img-overlay" class="max-h-[660px] object-contain rounded border border-slate-200 bg-white visual-view" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
+            <img id="img-binary" class="max-h-[660px] object-contain rounded border border-slate-700 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
+            <img id="img-warped" class="max-h-[660px] object-contain rounded border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
+            <img id="img-edges" class="max-h-[660px] object-contain rounded border border-slate-700 bg-black visual-view hidden" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
+            <img id="img-original" class="max-h-[660px] object-contain rounded border border-slate-200 bg-white visual-view hidden" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
         </div>
     </div>
 
     <!-- Detailed Question Classification Table -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200">
-            <h2 class="text-base font-bold text-slate-800">ตารางผลการจำแนกคำตอบ 50 ข้อ (Classification Matrix)</h2>
-            <p class="text-xs text-slate-500">แสดงผลการตัดสินใจ ค่า Fill-Ratio รายตัวเลือก และ Contrast Margin (ΔF)</p>
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/60">
+            <h2 class="text-sm font-semibold text-slate-900">ตารางจำแนกผลการตัดสินใจ 50 ข้อ (Classification Matrix)</h2>
+            <p class="text-xs text-slate-500">แสดงผลการตัดสินใจ ค่า Fill-Ratio รายตัวเลือก และ Contrast Margin (&Delta;F)</p>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-mono text-[11px] border-b border-slate-200">
                     <tr>
-                        <th class="px-4 py-3">ข้อที่</th>
-                        <th class="px-4 py-3">สถานะ (Status)</th>
-                        <th class="px-4 py-3 text-center">คำตอบ (Answer)</th>
-                        <th class="px-4 py-3">ความเชื่อมั่น</th>
-                        <th class="px-4 py-3">Fill-Ratios (A, B, C, D, E)</th>
-                        <th class="px-4 py-3 text-center">ΔF (Margin)</th>
-                        <th class="px-4 py-3">การวิเคราะห์ / เหตุผล</th>
+                        <th class="px-4 py-3 font-semibold">ข้อที่</th>
+                        <th class="px-4 py-3 font-semibold">สถานะ (Status)</th>
+                        <th class="px-4 py-3 font-semibold text-center">คำตอบ</th>
+                        <th class="px-4 py-3 font-semibold">ความเชื่อมั่น</th>
+                        <th class="px-4 py-3 font-semibold">Fill-Ratios (A, B, C, D, E)</th>
+                        <th class="px-4 py-3 font-semibold text-center">&Delta;F (Margin)</th>
+                        <th class="px-4 py-3 font-semibold">เกณฑ์การประเมิน</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     {% for q in data.results %}
                     <tr class="hover:bg-slate-50/80 transition-colors {% if q.status == 'AMBIGUOUS' %}bg-amber-50/40{% endif %}">
-                        <td class="px-4 py-3 font-bold text-slate-800">{{ q.question }}</td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 font-mono font-bold text-slate-900 tabular-nums">{{ q.question }}</td>
+                        <td class="px-4 py-3 font-mono text-[11px]">
                             {% if q.status == 'FILLED' %}
-                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                ✓ FILLED
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>FILLED
                             </span>
                             {% elif q.status == 'AMBIGUOUS' %}
-                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-amber-100 text-amber-800 border border-amber-200">
-                                ⚠️ AMBIGUOUS
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>AMBIGUOUS
                             </span>
                             {% else %}
-                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] bg-slate-100 text-slate-600 border border-slate-200">
-                                BLANK
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>BLANK
                             </span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-3 text-center">
                             {% if q.answer %}
-                            <span class="w-7 h-7 rounded-full inline-flex items-center justify-center font-bold bg-blue-600 text-white shadow-sm">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-900 text-white font-mono font-bold text-xs">
                                 {{ q.answer }}
                             </span>
                             {% else %}
-                            <span class="text-slate-400 font-mono">—</span>
+                            <span class="text-slate-300 font-mono">—</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 font-semibold text-slate-600">{{ q.confidence }}</td>
-                        <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">
+                        <td class="px-4 py-3 font-mono text-slate-600">{{ q.confidence }}</td>
+                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px] tabular-nums">
                             {% for opt_key, opt_val in q.fill_ratios.items() %}
-                            {{ opt_key }}:{{ (opt_val * 100)|round|int }}%{% if not loop.last %} | {% endif %}
+                            <span class="{% if q.answer == opt_key %}font-bold text-slate-900{% endif %}">{{ opt_key }}:{{ (opt_val * 100)|round|int }}%</span>{% if not loop.last %} <span class="text-slate-300">|</span> {% endif %}
                             {% endfor %}
                         </td>
-                        <td class="px-4 py-3 text-center font-mono font-bold text-slate-700">
+                        <td class="px-4 py-3 text-center font-mono font-medium tabular-nums text-slate-700">
                             {{ q.delta_f }}
                         </td>
                         <td class="px-4 py-3 text-slate-600 max-w-xs truncate" title="{{ q.reason }}">
@@ -190,17 +202,19 @@
     </div>
     {% else %}
     <!-- Rejection Alert Card -->
-    <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center space-y-4 shadow-sm">
-        <div class="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto">
+    <div class="bg-red-50/70 border border-red-200 rounded-xl p-8 text-center space-y-4">
+        <div class="w-12 h-12 rounded-lg bg-red-100 text-red-600 border border-red-200 flex items-center justify-center text-xl mx-auto">
             <i class="fa-solid fa-ban"></i>
         </div>
-        <h2 class="text-xl font-bold text-red-900">ระบบปฏิเสธการประมวลผล (Image Rejected)</h2>
-        <p class="text-sm text-red-700 max-w-md mx-auto">
-            {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ') }}
-        </p>
+        <div class="space-y-1">
+            <h2 class="text-lg font-bold text-red-950">ระบบปฏิเสธการประมวลผล (Quality Check Rejection)</h2>
+            <p class="text-xs text-red-800 max-w-md mx-auto">
+                {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ เช่น มืดเกินไป เบลอ หรือหาขอบกระดาษ A4 ไม่พบ') }}
+            </p>
+        </div>
         <div class="pt-2">
-            <a href="/upload" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white shadow-sm hover:bg-red-700">
-                <i class="fa-solid fa-arrow-rotate-left mr-2"></i>ถ่ายภาพใหม่
+            <a href="/upload" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors">
+                <i class="fa-solid fa-arrow-rotate-left mr-1.5"></i>ถ่ายภาพและอัปโหลดใหม่
             </a>
         </div>
     </div>
@@ -214,10 +228,10 @@
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                b.classList.remove('bg-white', 'shadow-sm', 'text-slate-900', 'font-semibold');
                 b.classList.add('text-slate-600');
             });
-            btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+            btn.classList.add('bg-white', 'shadow-sm', 'text-slate-900', 'font-semibold');
             btn.classList.remove('text-slate-600');
 
             const targetId = btn.getAttribute('data-target');
