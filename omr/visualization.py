@@ -86,7 +86,8 @@ def draw_overlay(
                 
         elif status == "AMBIGUOUS":
             # Highlight all candidate choices with orange warning boxes
-            opt1, opt2 = top_two[0], top_two[1]
+            opt1 = top_two[0] if len(top_two) > 0 else "A"
+            opt2 = top_two[1] if len(top_two) > 1 else "B"
             for opt_key in [opt1, opt2]:
                 if opt_key in options:
                     opt_info = options[opt_key]

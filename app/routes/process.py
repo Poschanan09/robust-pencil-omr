@@ -82,7 +82,9 @@ async def process_image_endpoint(
         raise
     except Exception as e:
         import traceback
-        err_msg = f"{type(e).__name__}: {str(e)}"
+        tb_lines = traceback.format_exc().strip().splitlines()
+        last_call = tb_lines[-2].strip() if len(tb_lines) >= 2 else ""
+        err_msg = f"{type(e).__name__}: {str(e)} [{last_call}]"
         print(f"[ERROR in process_image_endpoint]: {err_msg}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Processing failed: {err_msg}")
 

@@ -266,7 +266,7 @@ def find_document(
             
     # 3. Create visual annotations
     if corners is not None:
-        pts_int = corners.astype(np.int32)
+        pts_int = corners.reshape(4, 2).astype(np.int32)
         # Draw bounding polygon (Green)
         cv2.polylines(debug_img, [pts_int], isClosed=True, color=(0, 255, 0), thickness=6)
         
@@ -281,13 +281,14 @@ def find_document(
         corner_labels = ["TL", "TR", "BR", "BL"]
         
         for i, (pt, color, label) in enumerate(zip(pts_int, corner_colors, corner_labels)):
-            cv2.circle(debug_img, tuple(pt), radius=16, color=color, thickness=-1)
-            cv2.circle(debug_img, tuple(pt), radius=20, color=(255, 255, 255), thickness=3)
+            pt_tuple = (int(pt[0]), int(pt[1]))
+            cv2.circle(debug_img, pt_tuple, radius=16, color=color, thickness=-1)
+            cv2.circle(debug_img, pt_tuple, radius=20, color=(255, 255, 255), thickness=3)
             # Label text
             cv2.putText(
                 debug_img,
                 label,
-                (pt[0] + 15, pt[1] - 15),
+                (pt_tuple[0] + 15, pt_tuple[1] - 15),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1.1,
                 (255, 255, 255),
@@ -297,7 +298,7 @@ def find_document(
             cv2.putText(
                 debug_img,
                 label,
-                (pt[0] + 15, pt[1] - 15),
+                (pt_tuple[0] + 15, pt_tuple[1] - 15),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1.1,
                 color,

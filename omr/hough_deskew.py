@@ -71,8 +71,10 @@ def detect_skew_angle_hough(
         return 0.0, 0, debug_img
         
     angles = []
-    for line in lines:
-        x1, y1, x2, y2 = line[0]
+    # Reshape safely to handle both (N, 1, 4) and (N, 4) return shapes across OpenCV versions
+    lines_flat = lines.reshape(-1, 4)
+    for x1, y1, x2, y2 in lines_flat:
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         # Calculate angle of line in degrees
         dx = x2 - x1
         dy = y2 - y1
@@ -96,12 +98,12 @@ def detect_skew_angle_hough(
             cv2.line(debug_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
             
     if not angles:
-        return 0.0, len(lines), debug_img
+        return 0.0, int(len(lines_flat)), debug_img
         
     # Use median angle to suppress outliers
     median_angle = float(np.median(angles))
     
-    return median_angle, len(lines), debug_img
+    return median_angle, int(len(lines_flat)), debug_img
 
 
 def hough_deskew(
