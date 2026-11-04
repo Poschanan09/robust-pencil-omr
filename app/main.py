@@ -54,6 +54,15 @@ app.include_router(results_router)
 app.include_router(pages_router)
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Serve the browser tab icon (Favicon)."""
+    ico_path = STATIC_DIR / "favicon.ico"
+    if ico_path.exists():
+        return FileResponse(ico_path, media_type="image/x-icon")
+    return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
+
+
 @app.get("/download-template", tags=["Templates"])
 async def download_template_pdf():
     """Download the printable vector A4 Answer Sheet (PDF) for real pencil examination."""

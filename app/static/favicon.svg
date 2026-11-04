@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Paper Card Background -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#fcf8ef" stroke="#38352f" stroke-width="4"/>
+  
+  <!-- OMR Answer Bubble (Bottom Left) -->
+  <circle cx="24" cy="40" r="11" fill="#f0dfa0" stroke="#38352f" stroke-width="3"/>
+  <circle cx="24" cy="40" r="6" fill="#38352f"/>
+  
+  <!-- Red Checkmark Accent -->
+  <path d="M16 38 L22 45 L34 29" fill="none" stroke="#9e3a2e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- 2B Pencil (Angled from Top-Right) -->
+  <g transform="translate(38, 14) rotate(45)">
+    <!-- Eraser -->
+    <rect x="-5" y="-14" width="10" height="6" rx="2" fill="#9e3a2e"/>
+    <!-- Metal Ferrule -->
+    <rect x="-5" y="-8" width="10" height="4" fill="#b3ac9d"/>
+    <!-- Pencil Body (Yellow) -->
+    <rect x="-5" y="-4" width="10" height="18" fill="#eab308" stroke="#38352f" stroke-width="1.5"/>
+    <line x1="0" y1="-4" x2="0" y2="14" stroke="#ca8a04" stroke-width="1.5"/>
+    <!-- Sharpened Wood -->
+    <polygon points="-5,14 5,14 0,22" fill="#fed7aa" stroke="#38352f" stroke-width="1.5"/>
+    <!-- Graphite Lead Tip -->
+    <polygon points="-2,19 2,19 0,23" fill="#38352f"/>
+  </g>
+</svg>
