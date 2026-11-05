@@ -2,9 +2,9 @@
 Course: ICE415 Digital Image Processing (KMUTT)
 
 Generates:
-1. templates/answer_sheet_a4.pdf (Printable vector A4 sheet with 2x A5 sets of 40Q)
-2. templates/answer_sheet_a4.png (300 DPI 2480x3508 canonical image)
-3. templates/template_config.json (Normalized percentage coordinates of bubbles and markers)
+1. templates/answer_sheet_a4.pdf (Printable vector A4 sheet with 2x A5 sets of 40Q, 8 corner fiducial markers)
+2. templates/answer_sheet_a4.png (300 DPI 2480x3508 canonical image with 8 fiducial markers)
+3. templates/template_config.json (Normalized coordinates for OMR grading)
 """
 
 import json
@@ -26,26 +26,17 @@ CANVAS_WIDTH_PX = 2480
 CANVAS_HEIGHT_PX = 3508
 
 def build_template_coordinates():
-    """Compute exact millimeter, pixel, and normalized coordinates for 2x A5 sheets on A4."""
+    """Compute exact millimeter, pixel, and normalized coordinates for 2x A5 sheets on A4 with 8 markers."""
     bubble_radius_mm = 3.0  # Diameter = 6.0 mm
     row_height_mm = 7.8     # Vertical pitch = 7.8 mm
     bubble_pitch_x = 8.0    # Center-to-center pitch between A, B, C, D, E
 
-    # Unified Outer Bounding Frame across the A4 page
+    # Geometry for each A5 Sheet Frame
     frame_x = 7.0
-    frame_y = 6.0
     frame_w = 196.0
-    frame_h = 285.0
-
-    # 4 Corner Fiducial Markers (9.0mm x 9.0mm solid black squares)
-    m_size = 9.0
+    frame_h = 136.5
+    m_size = 9.0  # Fiducial square marker size: 9mm x 9mm
     margin = 2.5
-    markers = {
-        "top_left": {"x": frame_x + margin, "y": frame_y + margin, "w": m_size, "h": m_size},
-        "top_right": {"x": frame_x + frame_w - margin - m_size, "y": frame_y + margin, "w": m_size, "h": m_size},
-        "bottom_left": {"x": frame_x + margin, "y": frame_y + frame_h - margin - m_size, "w": m_size, "h": m_size},
-        "bottom_right": {"x": frame_x + frame_w - margin - m_size, "y": frame_y + frame_h - margin - m_size, "w": m_size, "h": m_size}
-    }
 
     # 4 Columns of 10 Questions
     # Col 1: Q01-Q10, Col 2: Q11-Q20, Col 3: Q21-Q30, Col 4: Q31-Q40
@@ -56,18 +47,44 @@ def build_template_coordinates():
         {"col": 4, "q_start": 31, "q_end": 40, "q_x": 158.5, "a_x": 164.5},
     ]
 
-    sheets = []
-    # Sheet 1: Top half (y0 = 6.0 mm)
-    # Sheet 2: Bottom half (y0 = 154.5 mm)
+    # Two A5 Sheets on one A4 (Sheet 1 top, Sheet 2 bottom)
     sheet_offsets = [
-        {"sheet_id": 1, "name": "Sheet 1 (Top A5)", "y0": 6.0},
-        {"sheet_id": 2, "name": "Sheet 2 (Bottom A5)", "y0": 154.5}
+        {
+            "sheet_id": 1,
+            "name": "Sheet 1 (Top A5)",
+            "y0": 6.0,
+            "frame": {"x_mm": frame_x, "y_mm": 6.0, "w_mm": frame_w, "h_mm": frame_h},
+            "markers": {
+                "top_left": {"x": frame_x + margin, "y": 6.0 + margin, "w": m_size, "h": m_size},
+                "top_right": {"x": frame_x + frame_w - margin - m_size, "y": 6.0 + margin, "w": m_size, "h": m_size},
+                "bottom_left": {"x": frame_x + margin, "y": 6.0 + frame_h - margin - m_size, "w": m_size, "h": m_size},
+                "bottom_right": {"x": frame_x + frame_w - margin - m_size, "y": 6.0 + frame_h - margin - m_size, "w": m_size, "h": m_size}
+            }
+        },
+        {
+            "sheet_id": 2,
+            "name": "Sheet 2 (Bottom A5)",
+            "y0": 154.5,
+            "frame": {"x_mm": frame_x, "y_mm": 154.5, "w_mm": frame_w, "h_mm": frame_h},
+            "markers": {
+                "top_left": {"x": frame_x + margin, "y": 154.5 + margin, "w": m_size, "h": m_size},
+                "top_right": {"x": frame_x + frame_w - margin - m_size, "y": 154.5 + margin, "w": m_size, "h": m_size},
+                "bottom_left": {"x": frame_x + margin, "y": 154.5 + frame_h - margin - m_size, "w": m_size, "h": m_size},
+                "bottom_right": {"x": frame_x + frame_w - margin - m_size, "y": 154.5 + frame_h - margin - m_size, "w": m_size, "h": m_size}
+            }
+        }
     ]
+
+    sheets = []
+    all_markers_dict = {}
 
     for s_info in sheet_offsets:
         s_id = s_info["sheet_id"]
         y0 = s_info["y0"]
         start_y = y0 + 44.0
+
+        for m_key, m_val in s_info["markers"].items():
+            all_markers_dict[f"s{s_id}_{m_key}"] = m_val
 
         sheet_questions = []
 
@@ -84,9 +101,9 @@ def build_template_coordinates():
                 for opt_idx, opt_label in enumerate(["A", "B", "C", "D", "E"]):
                     cx = a_x + (opt_idx * bubble_pitch_x)
 
-                    # Normalized coordinates relative to the detected outer frame
+                    # Normalized coordinates relative to the detected outer frame of this sheet
                     cx_pct = round((cx - frame_x) / frame_w, 5)
-                    cy_pct = round((cy - frame_y) / frame_h, 5)
+                    cy_pct = round((cy - y0) / frame_h, 5)
                     r_pct = round(bubble_radius_mm / frame_w, 5)
 
                     options[opt_label] = {
@@ -96,9 +113,9 @@ def build_template_coordinates():
                         "cx_pct": cx_pct,
                         "cy_pct": cy_pct,
                         "r_pct": r_pct,
-                        "cx_px": int(round(cx_pct * CANVAS_WIDTH_PX)),
-                        "cy_px": int(round(cy_pct * CANVAS_HEIGHT_PX)),
-                        "r_px": int(round(r_pct * CANVAS_WIDTH_PX))
+                        "cx_px": int(round((cx / PAGE_WIDTH_MM) * CANVAS_WIDTH_PX)),
+                        "cy_px": int(round((cy / PAGE_HEIGHT_MM) * CANVAS_HEIGHT_PX)),
+                        "r_px": int(round((bubble_radius_mm / PAGE_WIDTH_MM) * CANVAS_WIDTH_PX))
                     }
 
                 q_entry = {
@@ -113,12 +130,14 @@ def build_template_coordinates():
         sheets.append({
             "sheet_id": s_id,
             "y0_mm": y0,
+            "bounding_frame": s_info["frame"],
+            "fiducial_markers": s_info["markers"],
             "questions": sheet_questions
         })
 
     config = {
-        "template_name": "ICE415_Dual_A5_40Q_5Opts",
-        "version": "2.0.0",
+        "template_name": "ICE415_Dual_A5_40Q_8Markers",
+        "version": "2.1.0",
         "paper_size": "A4",
         "canvas_size": {
             "width_mm": PAGE_WIDTH_MM,
@@ -126,19 +145,9 @@ def build_template_coordinates():
             "width_px_300dpi": CANVAS_WIDTH_PX,
             "height_px_300dpi": CANVAS_HEIGHT_PX
         },
-        "bounding_frame": {
-            "x_mm": frame_x,
-            "y_mm": frame_y,
-            "w_mm": frame_w,
-            "h_mm": frame_h,
-            "x_pct": round(frame_x / PAGE_WIDTH_MM, 5),
-            "y_pct": round(frame_y / PAGE_HEIGHT_MM, 5),
-            "w_pct": round(frame_w / PAGE_WIDTH_MM, 5),
-            "h_pct": round(frame_h / PAGE_HEIGHT_MM, 5)
-        },
-        "fiducial_markers": markers,
         "cut_line_y_mm": MID_Y_MM,
         "sheets_count": 2,
+        "total_fiducial_markers": 8,
         "questions_per_sheet": 40,
         "questions_count": 40,
         "options_per_question": 5,
@@ -149,7 +158,10 @@ def build_template_coordinates():
         "row_height_y_mm": row_height_mm,
         "inner_mask_radius_ratio": 0.82,
         "sheets": sheets,
-        # Default questions list is Sheet 1 (Top A5 sheet)
+        # Default bounding frame & markers reference Sheet 1 for single-sheet grading
+        "bounding_frame": sheets[0]["bounding_frame"],
+        "fiducial_markers": sheets[0]["fiducial_markers"],
+        "all_8_markers": all_markers_dict,
         "questions": sheets[0]["questions"],
         "sheet2_questions": sheets[1]["questions"]
     }
@@ -157,38 +169,27 @@ def build_template_coordinates():
     return config
 
 def generate_pdf(config: dict, output_path: Path):
-    """Generate high-precision vector A4 PDF containing 2x A5 answer sheets with cutting guide."""
+    """Generate high-precision vector A4 PDF containing 2x A5 sheets with 8 corner fiducial markers."""
     pdf = FPDF(orientation="P", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     pdf.set_draw_color(0, 0, 0)
 
-    # 1. Outer A4 Frame (1.0 mm stroke)
-    bf = config["bounding_frame"]
-    pdf.set_line_width(1.0)
-    pdf.rect(bf["x_mm"], bf["y_mm"], bf["w_mm"], bf["h_mm"])
-
-    # 2. 4 Corner Fiducial Markers (solid black squares)
-    pdf.set_fill_color(0, 0, 0)
-    for m in config["fiducial_markers"].values():
-        pdf.rect(m["x"], m["y"], m["w"], m["h"], style="F")
-
-    # 3. Middle Horizontal Cut Line (dashed at 148.5 mm)
+    # 1. Middle Horizontal Cut Line (dashed at 148.5 mm)
     cut_y = config["cut_line_y_mm"]
     pdf.set_line_width(0.35)
     pdf.set_dash_pattern(dash=2.5, gap=1.5)
-    pdf.line(bf["x_mm"], cut_y, bf["x_mm"] + bf["w_mm"], cut_y)
+    pdf.line(6.0, cut_y, 204.0, cut_y)
     pdf.set_dash_pattern()
 
     # Cut guide label badge in the center
     pdf.set_font("Helvetica", "B", 7)
     pdf.set_fill_color(255, 255, 255)
-    cut_label = "  -- [ CUT HERE : SEPARATE INTO 2 A5 ANSWER SHEETS ] --  "
+    cut_label = "  -- [ CUT HERE : SEPARATE INTO 2 A5 SHEETS FOR 2 STUDENTS ] --  "
     lbl_w = pdf.get_string_width(cut_label) + 4
     pdf.set_xy((PAGE_WIDTH_MM - lbl_w) / 2, cut_y - 2.0)
     pdf.cell(lbl_w, 4, cut_label, align="C", fill=True)
 
-    # 4. Render both A5 sheets (Sheet 1 = top, Sheet 2 = bottom)
     cols_headers = [
         {"qx": 13.0, "ax": 19.0},
         {"qx": 61.5, "ax": 67.5},
@@ -197,9 +198,20 @@ def generate_pdf(config: dict, output_path: Path):
     ]
     r = config["bubble_radius_mm"]
 
+    # 2. Render both A5 sheets (Each has its own bounding box + 4 corner markers = 8 markers total)
     for s_data in config["sheets"]:
         s_id = s_data["sheet_id"]
         y0 = s_data["y0_mm"]
+        bf = s_data["bounding_frame"]
+
+        # Outer Frame for this A5 Sheet (1.0 mm stroke)
+        pdf.set_line_width(1.0)
+        pdf.rect(bf["x_mm"], bf["y_mm"], bf["w_mm"], bf["h_mm"])
+
+        # 4 Corner Fiducial Markers for this sheet (solid black squares)
+        pdf.set_fill_color(0, 0, 0)
+        for m in s_data["fiducial_markers"].values():
+            pdf.rect(m["x"], m["y"], m["w"], m["h"], style="F")
 
         # Header Titles
         pdf.set_font("Helvetica", "B", 9.5)
@@ -281,20 +293,16 @@ def generate_pdf(config: dict, output_path: Path):
         # Questions and Bubbles (40 Questions)
         pdf.set_line_width(0.3)
         for q in s_data["questions"]:
-            # Question number in bold
             pdf.set_font("Helvetica", "B", 7.0)
             pdf.set_xy(q["q_x_mm"] - 4.0, q["q_y_mm"] - 1.8)
             pdf.cell(7.0, 3.6, f"{q['q']:02d}", align="R")
 
-            # 5 Bubbles
             for opt_key, opt_data in q["options"].items():
                 cx = opt_data["cx_mm"]
                 cy = opt_data["cy_mm"]
 
-                # Circle outline
                 pdf.ellipse(cx - r, cy - r, 2 * r, 2 * r, style="D")
 
-                # Option letter inside bubble
                 pdf.set_font("Helvetica", "", 5.5)
                 pdf.set_text_color(90, 90, 90)
                 pdf.set_xy(cx - r, cy - 1.5)
@@ -303,14 +311,14 @@ def generate_pdf(config: dict, output_path: Path):
 
         # Footer of each sheet
         pdf.set_font("Helvetica", "I", 6.0)
-        pdf.set_xy(25.0, y0 + 125.5)
+        pdf.set_xy(25.0, y0 + 126.5)
         pdf.cell(160.0, 3.5, f"KMUTT Computer Engineering | ICE415 Robust Pencil OMR Project | Form: A5-40Q-Sheet{s_id}", align="C")
 
     pdf.output(str(output_path))
     print(f"✅ Generated Vector PDF Answer Sheet: {output_path}")
 
 def generate_png_canvas(config: dict, output_path: Path):
-    """Generate high-resolution 300 DPI image (2480x3508) using Pillow."""
+    """Generate high-resolution 300 DPI image (2480x3508) with all 8 fiducial markers using Pillow."""
     img = Image.new("RGB", (CANVAS_WIDTH_PX, CANVAS_HEIGHT_PX), color="white")
     draw = ImageDraw.Draw(img)
 
@@ -335,41 +343,41 @@ def generate_png_canvas(config: dict, output_path: Path):
         font_q = font_title
         font_opt = font_title
 
-    # 1. Outer A4 Frame
-    bf = config["bounding_frame"]
-    x0_px = mm_to_px(bf["x_mm"], True)
-    y0_px = mm_to_px(bf["y_mm"], False)
-    x1_px = mm_to_px(bf["x_mm"] + bf["w_mm"], True)
-    y1_px = mm_to_px(bf["y_mm"] + bf["h_mm"], False)
-    draw.rectangle([x0_px, y0_px, x1_px, y1_px], outline="black", width=12)
-
-    # 2. 4 Corner Fiducial Markers
-    for m in config["fiducial_markers"].values():
-        mx0 = mm_to_px(m["x"], True)
-        my0 = mm_to_px(m["y"], False)
-        mx1 = mm_to_px(m["x"] + m["w"], True)
-        my1 = mm_to_px(m["y"] + m["h"], False)
-        draw.rectangle([mx0, my0, mx1, my1], fill="black")
-
-    # 3. Middle Cut Line
+    # 1. Middle Cut Line
     cut_y_px = mm_to_px(config["cut_line_y_mm"], False)
     dash_len = mm_to_px(2.5, True)
     gap_len = mm_to_px(1.5, True)
-    cur_x = x0_px
-    end_x = x1_px
+    cur_x = mm_to_px(7.0, True)
+    end_x = mm_to_px(203.0, True)
     while cur_x < end_x:
-        draw.line([cur_x, cut_y_px, min(cur_x + dash_len, end_x), cut_y_px], fill="#333333", width=4)
+        draw.line([cur_x, cut_y_px, min(cur_x + dash_len, end_x), cut_y_px], fill="#444444", width=3)
         cur_x += dash_len + gap_len
 
     # Center Cut Label
-    cut_text = " -- [ CUT HERE : SEPARATE INTO 2 A5 ANSWER SHEETS ] -- "
-    draw.rectangle([CANVAS_WIDTH_PX // 2 - 320, cut_y_px - 18, CANVAS_WIDTH_PX // 2 + 320, cut_y_px + 18], fill="white")
+    cut_text = " -- [ CUT HERE : SEPARATE INTO 2 A5 SHEETS FOR 2 STUDENTS ] -- "
+    draw.rectangle([CANVAS_WIDTH_PX // 2 - 340, cut_y_px - 18, CANVAS_WIDTH_PX // 2 + 340, cut_y_px + 18], fill="white")
     draw.text((CANVAS_WIDTH_PX // 2, cut_y_px), cut_text, fill="black", font=font_bold, anchor="mm")
 
-    # 4. Render Sheets
+    # 2. Render each A5 sheet (Each with its own frame + 4 corner markers = 8 markers total)
     for s_data in config["sheets"]:
         s_id = s_data["sheet_id"]
         y0_mm = s_data["y0_mm"]
+        bf = s_data["bounding_frame"]
+
+        # Outer Frame for this A5 sheet
+        x0_px = mm_to_px(bf["x_mm"], True)
+        y0_px = mm_to_px(bf["y_mm"], False)
+        x1_px = mm_to_px(bf["x_mm"] + bf["w_mm"], True)
+        y1_px = mm_to_px(bf["y_mm"] + bf["h_mm"], False)
+        draw.rectangle([x0_px, y0_px, x1_px, y1_px], outline="black", width=10)
+
+        # 4 Corner Fiducial Markers for this sheet
+        for m in s_data["fiducial_markers"].values():
+            mx0 = mm_to_px(m["x"], True)
+            my0 = mm_to_px(m["y"], False)
+            mx1 = mm_to_px(m["x"] + m["w"], True)
+            my1 = mm_to_px(m["y"] + m["h"], False)
+            draw.rectangle([mx0, my0, mx1, my1], fill="black")
 
         # Titles
         draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 4.5, False)), "KING MONGKUT'S UNIVERSITY OF TECHNOLOGY THONBURI", fill="black", font=font_title, anchor="mm")
@@ -453,7 +461,7 @@ def generate_png_canvas(config: dict, output_path: Path):
 
 def main():
     print("==================================================")
-    print("📄 ICE415 Robust Pencil OMR - Dual A5 Template")
+    print("📄 ICE415 Robust Pencil OMR - Dual A5 Template (8 Markers)")
     print("==================================================")
 
     config = build_template_coordinates()
@@ -464,8 +472,8 @@ def main():
         json.dump(config, f, indent=2, ensure_ascii=False)
     print(f"✅ Generated Coordinates JSON: {json_path}")
     print(f"   Sheets: {config['sheets_count']} (Each A5)")
+    print(f"   Total Fiducial Markers: {config['total_fiducial_markers']} (4 per sheet)")
     print(f"   Questions per Sheet: {config['questions_per_sheet']}")
-    print(f"   Total Bubble Points on Sheet 1: {len(config['questions']) * config['options_per_question']}")
 
     # 2. Save PDF
     pdf_path = TEMPLATES_DIR / "answer_sheet_a4.pdf"
@@ -476,7 +484,7 @@ def main():
     generate_png_canvas(config, png_path)
 
     print("==================================================")
-    print("🎉 Template Generation Complete!")
+    print("🎉 Template Generation Complete with 8 Markers!")
     print("==================================================")
 
 if __name__ == "__main__":

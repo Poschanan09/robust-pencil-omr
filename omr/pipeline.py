@@ -148,10 +148,12 @@ class OMRPipeline:
 
         # =============================================================
         # [Sheet Layout & Template Selection]
-        # Auto-detect whether input is Landscape Kaggle 30Q or Portrait A4 50Q
+        # Auto-detect whether input is Landscape Kaggle 30Q or KMUTT ICE415 Sheet (A4 / A5)
         # =============================================================
         h_raw, w_raw = raw_image.shape[:2]
-        is_landscape_kaggle = (w_raw / h_raw) > 1.25
+        raw_aspect = w_raw / h_raw if h_raw > 0 else 1.0
+        # Kaggle 30Q benchmark sheets are ultra-wide table crops (aspect > 1.68, width <= 1200)
+        is_landscape_kaggle = (raw_aspect > 1.65 and w_raw <= 1500)
 
         if is_landscape_kaggle:
             # Load Kaggle Benchmark 30Q 4Opts Template
@@ -251,11 +253,27 @@ class OMRPipeline:
                     "processing_time_ms": round((time.perf_counter() - start_time) * 1000, 2)
                 }
 
-            # [Step 3] Perspective Rectification (Homography Warp to A4)
+            # [Step 3] Perspective Rectification (Homography Warp to A5 or A4)
+            # Check aspect ratio of detected corners:
+            # - If landscape (w/h > 1.05, e.g. A5 sheet frame 196x136.5 mm): warp to canonical A5 canvas (2480, 1728)
+            # - If portrait (w/h <= 1.05, e.g. full A4 sheet): warp to canonical A4 canvas (2480, 3508)
+            w_top = float(np.linalg.norm(corners[1] - corners[0]))
+            w_bot = float(np.linalg.norm(corners[2] - corners[3]))
+            h_left = float(np.linalg.norm(corners[3] - corners[0]))
+            h_right = float(np.linalg.norm(corners[2] - corners[1]))
+            avg_w = (w_top + w_bot) / 2.0
+            avg_h = (h_left + h_right) / 2.0
+            corner_aspect = avg_w / avg_h if avg_h > 0 else 1.0
+
+            if corner_aspect > 1.05:
+                canonical_canvas = (2480, 1728)
+            else:
+                canonical_canvas = (STANDARD_A4_WIDTH, STANDARD_A4_HEIGHT)
+
             persp_res = correct_perspective(
                 raw_image,
                 corners,
-                canvas_size=(STANDARD_A4_WIDTH, STANDARD_A4_HEIGHT)
+                canvas_size=canonical_canvas
             )
             warped_image = persp_res["warped_image"]
 

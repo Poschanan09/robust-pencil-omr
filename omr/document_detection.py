@@ -112,13 +112,11 @@ def detect_document_contour(
     if not contours:
         return None, None, edge_map
         
-    # Sort contours by area descending
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    
+    valid_quads = []
     for cnt in contours:
         area = cv2.contourArea(cnt)
         if area < min_area:
-            break
+            continue
             
         perimeter = cv2.arcLength(cnt, closed=True)
         # Douglas-Peucker approximation with epsilon = 2% of perimeter
@@ -128,8 +126,22 @@ def detect_document_contour(
         if len(approx) == 4 and cv2.isContourConvex(approx):
             pts = approx.reshape(4, 2)
             ordered_corners = order_corner_points(pts)
-            return ordered_corners, float(area), edge_map
+            cy = float(np.mean(ordered_corners[:, 1]))
+            valid_quads.append({
+                "corners": ordered_corners,
+                "area": float(area),
+                "cy": cy
+            })
             
+    if valid_quads:
+        max_area = max(q["area"] for q in valid_quads)
+        # Filter top-tier candidates (within 15% of max area, e.g. dual A5 sheets on A4)
+        top_candidates = [q for q in valid_quads if q["area"] >= 0.85 * max_area]
+        # Sort top-to-bottom so Sheet 1 (top) is prioritized on uncut sheets
+        top_candidates.sort(key=lambda q: q["cy"])
+        chosen = top_candidates[0]
+        return chosen["corners"], chosen["area"], edge_map
+
     return None, None, edge_map
 
 
