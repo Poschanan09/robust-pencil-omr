@@ -45,99 +45,82 @@
                     <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
                 </label>
             </div>
-
-            <!-- Quick-Test Sample Images (Ready-to-Test 1-Click) -->
-            <div class="mt-4 pt-3.5 border-t-2 border-dashed border-line/60">
-                <span class="text-xs font-display font-bold text-ink-muted uppercase tracking-wider block mb-2 flex items-center">
-                    <i class="fa-solid fa-flask-vial mr-1.5 text-accent"></i>
-                    หรือคลิกทดสอบทันทีด้วยภาพตัวอย่าง (Quick Test Samples):
-                </span>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_1_real_phone_photo.jpg" data-name="sample_1_real_phone_photo.jpg">
-                        <span class="text-xl">📸</span>
-                        <div class="min-w-0">
-                            <strong class="block text-ink text-xs truncate">1. ภาพถ่ายจริงกล้องมือถือ</strong>
-                            <span class="text-[10px] text-ink-muted block truncate">มุมเอียง + เงาโต๊ะ + 50 ข้อสมบูรณ์</span>
-                        </div>
-                    </button>
-                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_2_filled_sheet.png" data-name="sample_2_filled_sheet.png">
-                        <span class="text-xl">📝</span>
-                        <div class="min-w-0">
-                            <strong class="block text-ink text-xs truncate">2. กระดาษคำตอบ A5 ฝนชัด</strong>
-                            <span class="text-[10px] text-ink-muted block truncate">สแกนระนาบตรง 50 ข้อ ฝน 2B ชัด</span>
-                        </div>
-                    </button>
-                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_3_ambiguous_erasure.jpg" data-name="sample_3_ambiguous_erasure.jpg">
-                        <span class="text-xl">✏️</span>
-                        <div class="min-w-0">
-                            <strong class="block text-ink text-xs truncate">3. มีรอยลบ / ฝนซ้ำกำกวม</strong>
-                            <span class="text-[10px] text-ink-muted block truncate">ทดสอบ Tri-State & Review Queue</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
         </div>
 
-        <!-- Selected File Preview (Taped Note) -->
-        <div id="preview-container" class="hidden sketch-scrap p-3.5 items-center justify-between">
-            <div class="flex items-center space-x-3 overflow-hidden">
-                <img id="preview-thumbnail" class="w-12 h-12 object-cover rounded border-2 border-ink bg-white shadow-[1px_1px_0_#38352f]" src="" alt="Thumbnail">
-                <div class="min-w-0">
-                    <p id="preview-name" class="text-xs font-mono font-bold text-ink truncate">image.jpg</p>
-                    <p id="preview-size" class="text-[11px] font-mono text-annotation">1.2 MB</p>
+        <!-- Selected File Large Preview Viewport -->
+        <div id="preview-container" class="hidden sketch-sheet p-4 space-y-3 border-2 border-ink">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-line">
+                <div class="flex items-center space-x-2 overflow-hidden">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>
+                    <strong class="text-xs font-display font-bold text-ink">ภาพกระดาษคำตอบที่เลือก:</strong>
+                    <span id="preview-name" class="text-xs font-mono font-bold text-accent truncate max-w-[200px] sm:max-w-xs">image.jpg</span>
+                    <span id="preview-size" class="text-[11px] font-mono text-ink-muted"></span>
                 </div>
+                <button type="button" id="btn-remove-file" class="btn-sketch-paper text-xs px-2.5 py-1 text-accent hover:bg-red-50 flex items-center space-x-1 cursor-pointer">
+                    <i class="fa-regular fa-trash-can mr-1"></i>
+                    <span>เปลี่ยนภาพ</span>
+                </button>
             </div>
-            <button id="btn-remove-file" class="text-ink-muted hover:text-accent p-2 transition-colors">
-                <i class="fa-regular fa-trash-can text-sm"></i>
-            </button>
+            <div class="bg-ground p-3 rounded border-2 border-line flex items-center justify-center min-h-[300px] max-h-[520px] overflow-auto">
+                <img id="preview-thumbnail" class="max-h-[480px] w-auto max-w-full object-contain rounded border-2 border-ink bg-white shadow-[3px_3px_0_#38352f]" src="" alt="Uploaded Sheet Preview">
+            </div>
         </div>
 
         <!-- Collapsible Parameters Tuning (Accordion Scrap) -->
-        <details class="group sketch-scrap overflow-hidden">
+        <details class="group sketch-scrap overflow-hidden" open>
             <summary class="cursor-pointer px-4 py-3 text-xs font-display font-bold text-ink flex items-center justify-between select-none">
-                <span class="flex items-center">
-                    <i class="fa-solid fa-sliders mr-2 text-annotation"></i>
-                    ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)
+                <span class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-annotation"></i>
+                    <span>ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)</span>
+                    <span id="param-status-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border transition-colors bg-emerald-100 text-emerald-800 border-emerald-300">
+                        ● ค่าเริ่มต้น (Default)
+                    </span>
                 </span>
                 <i class="fa-solid fa-chevron-down text-ink-muted text-xs transition-transform group-open:rotate-180"></i>
             </summary>
             <div class="p-4 pt-2 border-t-2 border-dashed border-line/60">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
-                    <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                    <div id="card-tlow" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">1. ความไวต่อรอยจาง</label>
-                            <span id="val-tlow" class="font-mono font-bold text-accent text-xs px-1.5 py-0.5 rounded bg-amber-100/80 border border-amber-300/60">0.15</span>
+                            <span id="val-tlow" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.15</span>
                         </div>
-                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent cursor-pointer">
+                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-emerald-600 cursor-pointer">
                         <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ = เว้นว่าง (ตัดรอยลบ/ฝุ่น)</p>
                     </div>
 
-                    <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                    <div id="card-thigh" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">2. ความเข้มที่ฝนชัด</label>
-                            <span id="val-thigh" class="font-mono font-bold text-accent text-xs px-1.5 py-0.5 rounded bg-amber-100/80 border border-amber-300/60">0.40</span>
+                            <span id="val-thigh" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.40</span>
                         </div>
-                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent cursor-pointer">
+                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-emerald-600 cursor-pointer">
                         <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ = ฝนแน่นอน (ดินสอ 2B)</p>
                     </div>
 
-                    <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                    <div id="card-delta" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">3. ระยะความต่าง</label>
-                            <span id="val-delta" class="font-mono font-bold text-accent text-xs px-1.5 py-0.5 rounded bg-amber-100/80 border border-amber-300/60">0.20</span>
+                            <span id="val-delta" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.20</span>
                         </div>
-                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent cursor-pointer">
+                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-emerald-600 cursor-pointer">
                         <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ = เตือนกำกวม/ฝนซ้ำ</p>
                     </div>
                 </div>
 
                 <!-- Reset to Default Button & Helper Note -->
-                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-line/40 text-[11px]">
-                    <span class="text-ink-muted text-[10px]">ค่าเริ่มต้นแนะนำ: 0.15 | 0.40 | 0.20</span>
-                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="font-display font-bold text-accent hover:text-red-700 active:scale-95 flex items-center space-x-1.5 py-1 px-3 rounded border border-accent/30 hover:bg-red-50/60 transition-all cursor-pointer">
-                        <i class="fa-solid fa-rotate-left text-xs"></i>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-2 border-t border-line/40 text-[11px] gap-2">
+                    <span id="param-summary-text" class="font-mono text-emerald-800 font-bold flex items-center">
+                        <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i>
+                        <span>ใช้ค่ามาตรฐาน: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
+                    </span>
+                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="text-ink-muted hover:text-accent font-sans font-bold flex items-center px-2 py-1 rounded border border-transparent transition-colors cursor-pointer">
+                        <i class="fa-solid fa-arrow-rotate-left mr-1"></i>
                         <span>รีเซ็ตเป็นค่าเดิม</span>
                     </button>
+                </div>
+            </div>
+        </details>
                 </div>
             </div>
         </details>
@@ -206,5 +189,5 @@ function resetOMRParameters(e) {
     }
 }
 </script>
-<script src="/static/js/upload.js?v=2.5.0"></script>
+<script src="/static/js/upload.js?v=2.6.0"></script>
 {% endblock %}

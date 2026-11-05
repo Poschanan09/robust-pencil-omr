@@ -40,6 +40,37 @@
     </div>
 
     {% if data and data.status == 'success' %}
+    <!-- Parameters Used Banner -->
+    <div class="sketch-sheet p-3 px-4 flex flex-wrap items-center justify-between gap-2 border-2 border-line/70 bg-[#fffdf9] text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-display font-bold text-ink flex items-center">
+                <i class="fa-solid fa-sliders text-accent mr-1.5"></i>พารามิเตอร์ที่ใช้ตรวจรอบนี้:
+            </span>
+            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
+                ความไวเริ่มนับ (T<sub>low</sub>): <strong class="text-accent">{{ data.summary.thresholds_used.t_low|default(0.15) }}</strong>
+            </span>
+            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
+                ความเข้มฝนชัด (T<sub>high</sub>): <strong class="text-accent">{{ data.summary.thresholds_used.t_high|default(0.40) }}</strong>
+            </span>
+            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
+                ระยะห่างความต่าง (&Delta;F): <strong class="text-accent">{{ data.summary.thresholds_used.delta_min|default(0.20) }}</strong>
+            </span>
+        </div>
+        <div>
+            {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-red-100 text-red-700 border border-red-400 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>
+                ปรับแต่งเอง (Customized)
+            </span>
+            {% else %}
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center">
+                <span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>
+                ค่ามาตรฐาน (Default)
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Summary Metrics Sketched Bar -->
     <div class="sketch-sheet p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x-2 sm:divide-dashed sm:divide-line/50">
         <div class="pt-2 sm:pt-0 sm:px-3 first:pl-0">
