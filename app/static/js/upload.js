@@ -29,6 +29,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inputThigh) inputThigh.addEventListener("input", (e) => valThigh.textContent = e.target.value);
     if (inputDelta) inputDelta.addEventListener("input", (e) => valDelta.textContent = e.target.value);
 
+    // Reset parameters to default values
+    const btnResetParams = document.getElementById("btn-reset-params");
+    if (btnResetParams) {
+        btnResetParams.addEventListener("click", () => {
+            if (inputTlow) {
+                inputTlow.value = "0.15";
+                valTlow.textContent = "0.15";
+            }
+            if (inputThigh) {
+                inputThigh.value = "0.40";
+                valThigh.textContent = "0.40";
+            }
+            if (inputDelta) {
+                inputDelta.value = "0.20";
+                valDelta.textContent = "0.20";
+            }
+        });
+    }
+
     // Drag & Drop handlers
     ["dragenter", "dragover"].forEach(name => {
         dropZone.addEventListener(name, (e) => {

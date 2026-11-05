@@ -27,9 +27,9 @@ CANVAS_HEIGHT_PX = 3508
 
 def build_template_coordinates():
     """Compute exact millimeter, pixel, and normalized coordinates for 2x A5 sheets on A4 with 8 markers."""
-    bubble_radius_mm = 3.0  # Diameter = 6.0 mm
-    row_height_mm = 7.8     # Vertical pitch = 7.8 mm
-    bubble_pitch_x = 8.0    # Center-to-center pitch between A, B, C, D, E
+    bubble_radius_mm = 2.0  # Diameter = 4.0 mm
+    row_height_mm = 7.2     # Vertical pitch = 7.2 mm (3.2mm vertical gap between bubbles)
+    bubble_pitch_x = 5.8    # Center-to-center pitch between A, B, C, D, E (1.8mm horizontal gap)
 
     # Geometry for each A5 Sheet Frame
     frame_x = 7.0
@@ -38,13 +38,14 @@ def build_template_coordinates():
     m_size = 9.0  # Fiducial square marker size: 9mm x 9mm
     margin = 2.5
 
-    # 4 Columns of 10 Questions
-    # Col 1: Q01-Q10, Col 2: Q11-Q20, Col 3: Q21-Q30, Col 4: Q31-Q40
+    # 5 Columns of 10 Questions = 50 Questions per Sheet
+    # Col 1: Q01-Q10, Col 2: Q11-Q20, Col 3: Q21-Q30, Col 4: Q31-Q40, Col 5: Q41-Q50
     cols_config = [
-        {"col": 1, "q_start": 1,  "q_end": 10, "q_x": 13.0, "a_x": 19.0},
-        {"col": 2, "q_start": 11, "q_end": 20, "q_x": 61.5, "a_x": 67.5},
-        {"col": 3, "q_start": 21, "q_end": 30, "q_x": 110.0, "a_x": 116.0},
-        {"col": 4, "q_start": 31, "q_end": 40, "q_x": 158.5, "a_x": 164.5},
+        {"col": 1, "q_start": 1,  "q_end": 10, "q_x": 13.5, "a_x": 19.0},
+        {"col": 2, "q_start": 11, "q_end": 20, "q_x": 51.5, "a_x": 57.0},
+        {"col": 3, "q_start": 21, "q_end": 30, "q_x": 89.5, "a_x": 95.0},
+        {"col": 4, "q_start": 31, "q_end": 40, "q_x": 127.5, "a_x": 133.0},
+        {"col": 5, "q_start": 41, "q_end": 50, "q_x": 165.5, "a_x": 171.0},
     ]
 
     # Two A5 Sheets on one A4 (Sheet 1 top, Sheet 2 bottom)
@@ -81,7 +82,7 @@ def build_template_coordinates():
     for s_info in sheet_offsets:
         s_id = s_info["sheet_id"]
         y0 = s_info["y0"]
-        start_y = y0 + 44.0
+        start_y = y0 + 50.0
 
         for m_key, m_val in s_info["markers"].items():
             all_markers_dict[f"s{s_id}_{m_key}"] = m_val
@@ -136,8 +137,8 @@ def build_template_coordinates():
         })
 
     config = {
-        "template_name": "ICE415_Dual_A5_40Q_8Markers",
-        "version": "2.1.0",
+        "template_name": "ICE415_Dual_A5_50Q_8Markers",
+        "version": "2.2.0",
         "paper_size": "A4",
         "canvas_size": {
             "width_mm": PAGE_WIDTH_MM,
@@ -148,11 +149,11 @@ def build_template_coordinates():
         "cut_line_y_mm": MID_Y_MM,
         "sheets_count": 2,
         "total_fiducial_markers": 8,
-        "questions_per_sheet": 40,
-        "questions_count": 40,
+        "questions_per_sheet": 50,
+        "questions_count": 50,
         "options_per_question": 5,
         "options_labels": ["A", "B", "C", "D", "E"],
-        "bubble_diameter_mm": 6.0,
+        "bubble_diameter_mm": 4.0,
         "bubble_radius_mm": bubble_radius_mm,
         "bubble_pitch_x_mm": bubble_pitch_x,
         "row_height_y_mm": row_height_mm,
@@ -191,10 +192,11 @@ def generate_pdf(config: dict, output_path: Path):
     pdf.cell(lbl_w, 4, cut_label, align="C", fill=True)
 
     cols_headers = [
-        {"qx": 13.0, "ax": 19.0},
-        {"qx": 61.5, "ax": 67.5},
-        {"qx": 110.0, "ax": 116.0},
-        {"qx": 158.5, "ax": 164.5}
+        {"qx": 13.5, "ax": 19.0},
+        {"qx": 51.5, "ax": 57.0},
+        {"qx": 89.5, "ax": 95.0},
+        {"qx": 127.5, "ax": 133.0},
+        {"qx": 165.5, "ax": 171.0}
     ]
     r = config["bubble_radius_mm"]
 
@@ -224,64 +226,81 @@ def generate_pdf(config: dict, output_path: Path):
 
         pdf.set_font("Helvetica", "", 6.5)
         pdf.set_xy(25, y0 + 10.3)
-        pdf.cell(160, 3.5, f"Form: 40 Questions | 5 Options (A-E) | Pencil 2B Only | Sheet {s_id} [A5]", align="C")
+        pdf.cell(160, 3.5, f"Form: 50 Questions | 5 Options (A-E) | Pencil 2B Only | Sheet {s_id} [A5]", align="C")
 
-        # Student Metadata Boxes
+        # Student Metadata Boxes (Expanded height 19.5mm for comfortable handwriting)
         pdf.set_line_width(0.3)
         # Left Box: Student ID (11 Digits)
         box_top_y = y0 + 14.5
-        box_h = 14.0
+        box_h = 19.5
         pdf.rect(21.0, box_top_y, 78.0, box_h)
         pdf.set_font("Helvetica", "B", 7.0)
-        pdf.set_xy(22.5, box_top_y + 1.2)
+        pdf.set_xy(22.5, box_top_y + 1.6)
         pdf.cell(75.0, 3.5, "STUDENT ID (11 DIGITS):", align="L")
 
         digit_box_w = 6.0
-        digit_box_h = 7.0
+        digit_box_h = 10.5
         digit_pitch = 6.7
         for d_i in range(11):
             dbx = 22.5 + (d_i * digit_pitch)
-            dby = box_top_y + 5.2
+            dby = box_top_y + 6.0
             pdf.rect(dbx, dby, digit_box_w, digit_box_h)
 
-        # Right Box: Student Name, Subject, Class/Section
+        # Right Box: Student Name, Subject, Class/Section, Exam Date, Room
         pdf.rect(103.0, box_top_y, 86.0, box_h)
-        pdf.set_xy(104.5, box_top_y + 1.2)
-        pdf.cell(32.0, 3.5, "NAME - SURNAME:", align="L")
-        pdf.set_line_width(0.2)
-        pdf.line(136.0, box_top_y + 4.5, 187.0, box_top_y + 4.5)
+        pdf.set_font("Helvetica", "B", 7.0)
 
+        # Line 1: Name (spacious room to write)
+        pdf.set_xy(104.5, box_top_y + 1.8)
+        pdf.cell(32.0, 3.5, "NAME - SURNAME:", align="L")
+        pdf.set_line_width(0.25)
+        pdf.line(136.0, box_top_y + 6.0, 187.0, box_top_y + 6.0)
+
+        # Line 2: Subject & Class/Sec
         pdf.set_line_width(0.3)
-        pdf.set_xy(104.5, box_top_y + 8.2)
+        pdf.set_xy(104.5, box_top_y + 7.8)
         pdf.cell(16.0, 3.5, "SUBJECT:", align="L")
         pdf.set_line_width(0.2)
-        pdf.line(120.0, box_top_y + 11.5, 154.0, box_top_y + 11.5)
+        pdf.line(120.0, box_top_y + 12.0, 153.0, box_top_y + 12.0)
 
         pdf.set_line_width(0.3)
-        pdf.set_xy(156.0, box_top_y + 8.2)
-        pdf.cell(14.0, 3.5, "SEC / RM:", align="L")
+        pdf.set_xy(155.0, box_top_y + 7.8)
+        pdf.cell(16.0, 3.5, "CLASS / SEC:", align="L")
         pdf.set_line_width(0.2)
-        pdf.line(170.0, box_top_y + 11.5, 187.0, box_top_y + 11.5)
+        pdf.line(174.0, box_top_y + 12.0, 187.0, box_top_y + 12.0)
 
-        # Instructions Bar
+        # Line 3: Exam Date & Seat / Room
+        pdf.set_line_width(0.3)
+        pdf.set_xy(104.5, box_top_y + 13.8)
+        pdf.cell(16.0, 3.5, "EXAM DATE:", align="L")
+        pdf.set_line_width(0.2)
+        pdf.line(123.0, box_top_y + 18.0, 153.0, box_top_y + 18.0)
+
+        pdf.set_line_width(0.3)
+        pdf.set_xy(155.0, box_top_y + 13.8)
+        pdf.cell(16.0, 3.5, "SEAT / ROOM:", align="L")
+        pdf.set_line_width(0.2)
+        pdf.line(175.0, box_top_y + 18.0, 187.0, box_top_y + 18.0)
+
+        # Instructions Bar (shifted down)
         pdf.set_fill_color(240, 240, 240)
         pdf.set_line_width(0.25)
-        pdf.rect(21.0, y0 + 30.5, 168.0, 4.8, style="FD")
+        pdf.rect(21.0, y0 + 36.0, 168.0, 4.8, style="FD")
         pdf.set_font("Helvetica", "I", 6.5)
         pdf.set_text_color(40, 40, 40)
-        pdf.set_xy(21.0, y0 + 31.2)
+        pdf.set_xy(21.0, y0 + 36.7)
         pdf.cell(168.0, 3.5, "Instructions: Fill the oval completely with 2B pencil. Erase cleanly if changing. Do not fold or smudge.", align="C")
         pdf.set_text_color(0, 0, 0)
 
-        # Column Dividers (3 vertical lines between the 4 columns)
+        # Column Dividers (4 vertical lines between the 5 columns)
         pdf.set_line_width(0.35)
-        dividers_x = [56.5, 105.0, 153.5]
+        dividers_x = [46.5, 84.5, 122.5, 160.5]
         for div_x in dividers_x:
-            pdf.line(div_x, y0 + 36.5, div_x, y0 + 122.5)
+            pdf.line(div_x, y0 + 42.0, div_x, y0 + 122.0)
 
         # Column Header Labels (NO. A B C D E)
         pdf.set_font("Helvetica", "B", 7.0)
-        hdr_y = y0 + 37.0
+        hdr_y = y0 + 43.0
         for col_hdr in cols_headers:
             pdf.set_xy(col_hdr["qx"] - 3.5, hdr_y)
             pdf.cell(7.0, 3.5, "NO.", align="C")
@@ -290,7 +309,7 @@ def generate_pdf(config: dict, output_path: Path):
                 pdf.set_xy(ox - r, hdr_y)
                 pdf.cell(2 * r, 3.5, o_label, align="C")
 
-        # Questions and Bubbles (40 Questions)
+        # Questions and Bubbles (50 Questions)
         pdf.set_line_width(0.3)
         for q in s_data["questions"]:
             pdf.set_font("Helvetica", "B", 7.0)
@@ -303,16 +322,16 @@ def generate_pdf(config: dict, output_path: Path):
 
                 pdf.ellipse(cx - r, cy - r, 2 * r, 2 * r, style="D")
 
-                pdf.set_font("Helvetica", "", 5.5)
+                pdf.set_font("Helvetica", "", 4.8)
                 pdf.set_text_color(90, 90, 90)
-                pdf.set_xy(cx - r, cy - 1.5)
-                pdf.cell(2 * r, 3.0, opt_key, align="C")
+                pdf.set_xy(cx - r, cy - 1.3)
+                pdf.cell(2 * r, 2.6, opt_key, align="C")
                 pdf.set_text_color(0, 0, 0)
 
         # Footer of each sheet
         pdf.set_font("Helvetica", "I", 6.0)
         pdf.set_xy(25.0, y0 + 126.5)
-        pdf.cell(160.0, 3.5, f"KMUTT Computer Engineering | ICE415 Robust Pencil OMR Project | Form: A5-40Q-Sheet{s_id}", align="C")
+        pdf.cell(160.0, 3.5, f"KMUTT Computer Engineering | ICE415 Robust Pencil OMR Project | Form: A5-50Q-Sheet{s_id}", align="C")
 
     pdf.output(str(output_path))
     print(f"✅ Generated Vector PDF Answer Sheet: {output_path}")
@@ -333,8 +352,8 @@ def generate_png_canvas(config: dict, output_path: Path):
         font_sub = ImageFont.truetype("arialbd.ttf", 26)
         font_small = ImageFont.truetype("arial.ttf", 20)
         font_bold = ImageFont.truetype("arialbd.ttf", 22)
-        font_q = ImageFont.truetype("arialbd.ttf", 22)
-        font_opt = ImageFont.truetype("arial.ttf", 18)
+        font_q = ImageFont.truetype("arialbd.ttf", 20)
+        font_opt = ImageFont.truetype("arial.ttf", 14)
     except:
         font_title = ImageFont.load_default()
         font_sub = font_title
@@ -382,57 +401,68 @@ def generate_png_canvas(config: dict, output_path: Path):
         # Titles
         draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 4.5, False)), "KING MONGKUT'S UNIVERSITY OF TECHNOLOGY THONBURI", fill="black", font=font_title, anchor="mm")
         draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 8.5, False)), "ICE415 Digital Image Processing - OMR Answer Sheet", fill="black", font=font_sub, anchor="mm")
-        draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 12.0, False)), f"Form: 40 Questions | 5 Options (A-E) | Pencil 2B Only | Sheet {s_id} [A5]", fill="#333333", font=font_small, anchor="mm")
+        draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 12.0, False)), f"Form: 50 Questions | 5 Options (A-E) | Pencil 2B Only | Sheet {s_id} [A5]", fill="#333333", font=font_small, anchor="mm")
 
-        # Metadata Boxes
+        # Metadata Boxes (Expanded height 19.5mm for comfortable handwriting)
         # Left Box (Student ID)
         bx0 = mm_to_px(21.0, True)
         by0 = mm_to_px(y0_mm + 14.5, False)
         bx1 = mm_to_px(99.0, True)
-        by1 = mm_to_px(y0_mm + 28.5, False)
+        by1 = mm_to_px(y0_mm + 34.0, False)
         draw.rectangle([bx0, by0, bx1, by1], outline="black", width=3)
         draw.text((bx0 + 12, by0 + 8), "STUDENT ID (11 DIGITS):", fill="black", font=font_bold)
         for i in range(11):
             dbx0 = mm_to_px(22.5 + (i * 6.7), True)
-            dby0 = mm_to_px(y0_mm + 19.5, False)
+            dby0 = mm_to_px(y0_mm + 20.5, False)
             dbx1 = dbx0 + mm_to_px(6.0, True)
-            dby1 = dby0 + mm_to_px(7.0, False)
+            dby1 = dby0 + mm_to_px(10.5, False)
             draw.rectangle([dbx0, dby0, dbx1, dby1], outline="black", width=2)
 
-        # Right Box (Name & Subject & Section)
+        # Right Box (Name & Subject & Section & Date - Spacious 3 Rows)
         rx0 = mm_to_px(103.0, True)
         rx1 = mm_to_px(189.0, True)
         draw.rectangle([rx0, by0, rx1, by1], outline="black", width=3)
-        draw.text((rx0 + 12, by0 + 8), "NAME - SURNAME:", fill="black", font=font_bold)
-        draw.line([rx0 + 160, by0 + 26, rx1 - 15, by0 + 26], fill="black", width=2)
-        draw.text((rx0 + 12, by0 + 44), "SUBJECT:", fill="black", font=font_bold)
-        draw.line([rx0 + 105, by0 + 62, rx0 + 380, by0 + 62], fill="black", width=2)
-        draw.text((rx0 + 395, by0 + 44), "SEC / RM:", fill="black", font=font_bold)
-        draw.line([rx0 + 490, by0 + 62, rx1 - 15, by0 + 62], fill="black", width=2)
 
-        # Instructions Bar
+        # Row 1: Name (spacious room to write)
+        draw.text((rx0 + 12, by0 + 12), "NAME - SURNAME:", fill="black", font=font_bold)
+        draw.line([rx0 + 175, by0 + 52, rx1 - 15, by0 + 52], fill="black", width=2)
+
+        # Row 2: Subject & Class/Sec
+        draw.text((rx0 + 12, by0 + 82), "SUBJECT:", fill="black", font=font_bold)
+        draw.line([rx0 + 110, by0 + 122, rx0 + 390, by0 + 122], fill="black", width=2)
+        draw.text((rx0 + 405, by0 + 82), "CLASS / SEC:", fill="black", font=font_bold)
+        draw.line([rx0 + 535, by0 + 122, rx1 - 15, by0 + 122], fill="black", width=2)
+
+        # Row 3: Exam Date & Seat/Room
+        draw.text((rx0 + 12, by0 + 152), "EXAM DATE:", fill="black", font=font_bold)
+        draw.line([rx0 + 135, by0 + 192, rx0 + 390, by0 + 192], fill="black", width=2)
+        draw.text((rx0 + 405, by0 + 152), "SEAT / ROOM:", fill="black", font=font_bold)
+        draw.line([rx0 + 545, by0 + 192, rx1 - 15, by0 + 192], fill="black", width=2)
+
+        # Instructions Bar (shifted down)
         ib_x0 = mm_to_px(21.0, True)
-        ib_y0 = mm_to_px(y0_mm + 30.5, False)
+        ib_y0 = mm_to_px(y0_mm + 36.0, False)
         ib_x1 = mm_to_px(189.0, True)
-        ib_y1 = mm_to_px(y0_mm + 35.3, False)
+        ib_y1 = mm_to_px(y0_mm + 40.8, False)
         draw.rectangle([ib_x0, ib_y0, ib_x1, ib_y1], fill="#eeeeee", outline="black", width=2)
         draw.text((CANVAS_WIDTH_PX // 2, (ib_y0 + ib_y1) // 2), "Instructions: Fill the oval completely with 2B pencil. Erase cleanly if changing. Do not fold or smudge.", fill="#222222", font=font_small, anchor="mm")
 
-        # Column Dividers
-        for div_mm in [56.5, 105.0, 153.5]:
+        # Column Dividers (4 vertical lines between the 5 columns)
+        for div_mm in [46.5, 84.5, 122.5, 160.5]:
             dx = mm_to_px(div_mm, True)
-            dy_start = mm_to_px(y0_mm + 36.5, False)
-            dy_end = mm_to_px(y0_mm + 122.5, False)
+            dy_start = mm_to_px(y0_mm + 42.0, False)
+            dy_end = mm_to_px(y0_mm + 122.0, False)
             draw.line([dx, dy_start, dx, dy_end], fill="#333333", width=3)
 
-        # Column Headers (NO. A B C D E)
+        # Column Headers (NO. A B C D E for 5 columns)
         col_hdrs = [
-            {"qx": 13.0, "ax": 19.0},
-            {"qx": 61.5, "ax": 67.5},
-            {"qx": 110.0, "ax": 116.0},
-            {"qx": 158.5, "ax": 164.5}
+            {"qx": 13.5, "ax": 19.0},
+            {"qx": 51.5, "ax": 57.0},
+            {"qx": 89.5, "ax": 95.0},
+            {"qx": 127.5, "ax": 133.0},
+            {"qx": 165.5, "ax": 171.0}
         ]
-        hdr_y_px = mm_to_px(y0_mm + 38.5, False)
+        hdr_y_px = mm_to_px(y0_mm + 44.5, False)
         for ch in col_hdrs:
             draw.text((mm_to_px(ch["qx"], True), hdr_y_px), "NO.", fill="black", font=font_q, anchor="mm")
             for oi, ol in enumerate(["A", "B", "C", "D", "E"]):
@@ -454,7 +484,7 @@ def generate_png_canvas(config: dict, output_path: Path):
                 draw.text((cx_px, cy_px), opt_key, fill="#777777", font=font_opt, anchor="mm")
 
         # Footer
-        draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 126.5, False)), f"KMUTT Computer Engineering | ICE415 Robust Pencil OMR Project | Form: A5-40Q-Sheet{s_id}", fill="#555555", font=font_small, anchor="mm")
+        draw.text((CANVAS_WIDTH_PX // 2, mm_to_px(y0_mm + 128.5, False)), f"KMUTT Computer Engineering | ICE415 Robust Pencil OMR Project | Form: A5-50Q-Sheet{s_id}", fill="#555555", font=font_small, anchor="mm")
 
     img.save(output_path, dpi=(300, 300))
     print(f"✅ Generated 300 DPI PNG Canvas: {output_path}")

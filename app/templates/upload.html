@@ -66,34 +66,45 @@
             <summary class="cursor-pointer px-4 py-3 text-xs font-display font-bold text-ink flex items-center justify-between select-none">
                 <span class="flex items-center">
                     <i class="fa-solid fa-sliders mr-2 text-annotation"></i>
-                    ตั้งค่าพารามิเตอร์การประมวลผล (Algorithm Tuning)
+                    ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)
                 </span>
                 <i class="fa-solid fa-chevron-down text-ink-muted text-xs transition-transform group-open:rotate-180"></i>
             </summary>
-            <div class="p-4 pt-2 border-t-2 border-dashed border-line/60 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="text-[11px] font-display font-bold text-ink">T<sub>low</sub> (ขีดแบ่งล่าง)</label>
-                        <span id="val-tlow" class="font-mono font-bold text-accent">0.15</span>
+            <div class="p-4 pt-2 border-t-2 border-dashed border-line/60">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs mb-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[11px] font-display font-bold text-ink" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ หากจางกว่านี้จะถือว่าเว้นว่าง">ความไวต่อรอยจาง (เริ่มนับ)</label>
+                            <span id="val-tlow" class="font-mono font-bold text-accent">0.15</span>
+                        </div>
+                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent">
+                        <p class="text-[10px] text-ink-muted mt-0.5">จางกว่านี้ = ว่างแน่นอน (ตัดรอยลบ/รอยเปื้อน)</p>
                     </div>
-                    <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent">
-                    <p class="text-[10px] text-ink-muted mt-0.5">ต่ำกว่านี้ถือว่าเว้นว่างแน่นอน</p>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[11px] font-display font-bold text-ink" title="ระดับความเข้มที่มั่นใจว่านักศึกษาตั้งใจฝนคำตอบ">ความเข้มที่มั่นใจ (ฝนชัด)</label>
+                            <span id="val-thigh" class="font-mono font-bold text-accent">0.40</span>
+                        </div>
+                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent">
+                        <p class="text-[10px] text-ink-muted mt-0.5">เข้มเกินนี้ = ฝนคำตอบแน่นอน (ดินสอ 2B ปกติ)</p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[11px] font-display font-bold text-ink" title="ความต่างระหว่างข้อที่เข้มสุดกับข้อรองลงมา เพื่อป้องกันการฝนสองข้อ">ระยะห่างความมั่นใจ (กันฝนซ้ำ)</label>
+                            <span id="val-delta" class="font-mono font-bold text-accent">0.20</span>
+                        </div>
+                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent">
+                        <p class="text-[10px] text-ink-muted mt-0.5">ต่างน้อยกว่านี้ = เตือนข้อกำกวม/อาจฝน 2 ข้อ</p>
+                    </div>
                 </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="text-[11px] font-display font-bold text-ink">T<sub>high</sub> (ขีดแบ่งบน)</label>
-                        <span id="val-thigh" class="font-mono font-bold text-accent">0.40</span>
-                    </div>
-                    <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent">
-                    <p class="text-[10px] text-ink-muted mt-0.5">สูงกว่านี้ถือว่าฝนคำตอบแน่นอน</p>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="text-[11px] font-display font-bold text-ink">&Delta;F (Contrast Margin)</label>
-                        <span id="val-delta" class="font-mono font-bold text-accent">0.20</span>
-                    </div>
-                    <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent">
-                    <p class="text-[10px] text-ink-muted mt-0.5">ส่วนต่างขั้นต่ำระหว่างอันดับ 1 และ 2</p>
+
+                <!-- Reset to Default Button -->
+                <div class="flex justify-between items-center pt-2 border-t border-line/40 text-[11px]">
+                    <span class="text-ink-muted text-[10px]">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
+                    <button type="button" id="btn-reset-params" class="font-display font-bold text-accent hover:underline flex items-center space-x-1 py-1 px-2.5 rounded hover:bg-black/5 transition-colors cursor-pointer">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>
+                        <span>รีเซ็ตเป็นค่าเดิม</span>
+                    </button>
                 </div>
             </div>
         </details>
