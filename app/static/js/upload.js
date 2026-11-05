@@ -48,60 +48,43 @@ document.addEventListener("DOMContentLoaded", () => {
         const isDeltaChanged = (delta !== DEFAULT_DELTA);
         const isAnyChanged = isTlowChanged || isThighChanged || isDeltaChanged;
 
-        // Individual Slider Badges & Accents
+        // Individual Slider Number Colors
         if (valTlow) {
             valTlow.className = isTlowChanged
-                ? "font-mono font-bold text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-400"
-                : "font-mono font-bold text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300";
+                ? "font-mono font-bold text-xs text-accent"
+                : "font-mono font-bold text-xs text-emerald-700";
         }
-        if (inputTlow) {
-            inputTlow.className = isTlowChanged ? "w-full accent-red-600 cursor-pointer" : "w-full accent-emerald-600 cursor-pointer";
-        }
-
         if (valThigh) {
             valThigh.className = isThighChanged
-                ? "font-mono font-bold text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-400"
-                : "font-mono font-bold text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300";
+                ? "font-mono font-bold text-xs text-accent"
+                : "font-mono font-bold text-xs text-emerald-700";
         }
-        if (inputThigh) {
-            inputThigh.className = isThighChanged ? "w-full accent-red-600 cursor-pointer" : "w-full accent-emerald-600 cursor-pointer";
-        }
-
         if (valDelta) {
             valDelta.className = isDeltaChanged
-                ? "font-mono font-bold text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-400"
-                : "font-mono font-bold text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300";
-        }
-        if (inputDelta) {
-            inputDelta.className = isDeltaChanged ? "w-full accent-red-600 cursor-pointer" : "w-full accent-emerald-600 cursor-pointer";
+                ? "font-mono font-bold text-xs text-accent"
+                : "font-mono font-bold text-xs text-emerald-700";
         }
 
-        // Global Status Badge & Summary
+        // Reset Button & Text Response
         if (isAnyChanged) {
-            // RED: Customized
-            if (paramStatusBadge) {
-                paramStatusBadge.textContent = "● ปรับแต่งเอง (Customized)";
-                paramStatusBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono font-bold border bg-red-100 text-red-700 border-red-400 animate-pulse";
-            }
-            if (paramSummaryText) {
-                paramSummaryText.innerHTML = `<i class="fa-solid fa-sliders text-red-600 mr-1.5"></i> <span class="text-red-700 font-bold">ใช้ค่าปรับแต่งเอง: เริ่มนับ ${tlow} | ฝนชัด ${thigh} | ระยะห่าง ${delta}</span>`;
-            }
+            // Active Custom State: Red text and underline
             if (btnResetParams) {
-                btnResetParams.innerHTML = '<i class="fa-solid fa-arrow-rotate-left mr-1 text-red-600"></i> <span class="text-red-700 font-bold underline">รีเซ็ตกลับเป็นค่าเริ่มต้น</span>';
-                btnResetParams.className = "text-red-700 hover:text-red-900 font-sans font-bold flex items-center px-2.5 py-1 rounded bg-red-50 border border-red-300 shadow-sm transition-colors cursor-pointer";
+                btnResetParams.innerHTML = '<i class="fa-solid fa-rotate-left text-xs"></i> <span class="font-bold underline text-accent">รีเซ็ตเป็นค่าเดิม</span>';
+                btnResetParams.className = "font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-accent hover:text-red-800 transition-all cursor-pointer";
+            }
+            if (btnProcess) {
+                const span = btnProcess.querySelector("span");
+                if (span) span.textContent = `เริ่มประมวลผล (ปรับแต่ง: ${tlow} | ${thigh} | ${delta})`;
             }
         } else {
-            // GREEN: Default
-            if (paramStatusBadge) {
-                paramStatusBadge.textContent = "● ค่าเริ่มต้น (Default)";
-                paramStatusBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono font-bold border bg-emerald-100 text-emerald-800 border-emerald-300";
-            }
-            if (paramSummaryText) {
-                paramSummaryText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> <span class="text-emerald-800 font-bold">ใช้ค่ามาตรฐาน: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>`;
-            }
+            // Default State: Soft Green
             if (btnResetParams) {
-                btnResetParams.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> <span class="text-emerald-700 font-medium">ค่ามาตรฐานแล้ว</span>';
-                btnResetParams.className = "text-emerald-700 font-sans font-medium flex items-center px-2 py-1 rounded border border-transparent transition-colors cursor-pointer";
+                btnResetParams.innerHTML = '<i class="fa-solid fa-check text-xs text-emerald-600"></i> <span class="text-emerald-700">ค่าเริ่มต้น</span>';
+                btnResetParams.className = "font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-emerald-700 transition-all cursor-pointer";
+            }
+            if (btnProcess) {
+                const span = btnProcess.querySelector("span");
+                if (span) span.textContent = "เริ่มประมวลผลและตรวจกระดาษคำตอบ";
             }
         }
     }
@@ -126,8 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateParameterState();
 
         if (btnResetParams) {
-            btnResetParams.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> <span class="text-emerald-700 font-bold">รีเซ็ตเป็นค่าเริ่มต้นเรียบร้อย</span>';
-            btnResetParams.className = "text-emerald-700 font-sans font-bold flex items-center px-2.5 py-1 rounded bg-emerald-100 border border-emerald-400 shadow-sm transition-colors";
+            btnResetParams.innerHTML = '<i class="fa-solid fa-check text-emerald-600 text-xs mr-1"></i> <span class="text-emerald-700 font-bold">รีเซ็ตเป็นค่าเดิมแล้ว</span>';
             setTimeout(() => {
                 updateParameterState();
             }, 1200);

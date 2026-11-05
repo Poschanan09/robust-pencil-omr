@@ -191,6 +191,68 @@
         </div>
     </div>
 
+    <!-- Live Interactive Parameter Tuning with Image -->
+    <div class="sketch-sheet p-5 space-y-4 border-2 border-line bg-[#fffdfa]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line/60">
+            <div>
+                <h3 class="text-sm font-display font-bold text-ink flex items-center">
+                    <i class="fa-solid fa-sliders text-accent mr-2"></i>
+                    ปรับจูนพารามิเตอร์แบบเรียลไทม์กับภาพนี้ (Live Tuning on This Sheet)
+                </h3>
+                <p class="text-[11px] text-ink-muted">เลื่อนปรับระดับความไวของดินสอ แล้วกดปุ่มอัปเดตเพื่อดูผลตรวจบนภาพทันที</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button type="button" id="btn-reprocess" class="btn-sketch-red px-4 py-2 text-xs font-display font-bold flex items-center space-x-1.5 shadow-[2px_2px_0_#38352f] cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                    <span>คำนวณและอัปเดตผลบนภาพทันที</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">1. ความไวต่อรอยจาง (เริ่มนับ)</label>
+                    <span id="reproc-val-tlow" class="font-mono font-bold text-xs text-accent">
+                        {{ data.summary.thresholds_used.t_low|default(0.15) }}
+                    </span>
+                </div>
+                <input type="range" id="reproc-input-tlow" min="0.05" max="0.30" step="0.01" value="{{ data.summary.thresholds_used.t_low|default(0.15) }}" class="w-full accent-accent cursor-pointer">
+                <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ = เว้นว่าง (Blank)</p>
+            </div>
+
+            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">2. ความเข้มที่มั่นใจ (ฝนชัด)</label>
+                    <span id="reproc-val-thigh" class="font-mono font-bold text-xs text-accent">
+                        {{ data.summary.thresholds_used.t_high|default(0.40) }}
+                    </span>
+                </div>
+                <input type="range" id="reproc-input-thigh" min="0.25" max="0.65" step="0.01" value="{{ data.summary.thresholds_used.t_high|default(0.40) }}" class="w-full accent-accent cursor-pointer">
+                <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ = ฝนคำตอบชัดเจน (Filled)</p>
+            </div>
+
+            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">3. ระยะห่างความต่าง (&Delta;F)</label>
+                    <span id="reproc-val-delta" class="font-mono font-bold text-xs text-accent">
+                        {{ data.summary.thresholds_used.delta_min|default(0.20) }}
+                    </span>
+                </div>
+                <input type="range" id="reproc-input-delta" min="0.10" max="0.35" step="0.01" value="{{ data.summary.thresholds_used.delta_min|default(0.20) }}" class="w-full accent-accent cursor-pointer">
+                <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ = เตือนกำกวม (Ambiguous)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-line/40 text-[11px]">
+            <span class="text-ink-muted text-[10px] font-mono">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
+            <button type="button" id="btn-reproc-reset" class="font-display font-bold text-xs flex items-center space-x-1.5 text-accent hover:text-red-700 transition-all cursor-pointer">
+                <i class="fa-solid fa-rotate-left text-xs"></i>
+                <span>รีเซ็ตเป็นค่าเริ่มต้น</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Detailed Question Classification Table (Ruled Ledger) -->
     <div class="sketch-sheet p-5 space-y-3 overflow-hidden">
         <div class="border-b-2 border-line/60 pb-3">
@@ -311,5 +373,57 @@
             if (targetImg) targetImg.classList.remove('hidden');
         });
     });
+
+    // Live Parameter Re-tuning with Image
+    const reprocInputTlow = document.getElementById("reproc-input-tlow");
+    const reprocInputThigh = document.getElementById("reproc-input-thigh");
+    const reprocInputDelta = document.getElementById("reproc-input-delta");
+    const reprocValTlow = document.getElementById("reproc-val-tlow");
+    const reprocValThigh = document.getElementById("reproc-val-thigh");
+    const reprocValDelta = document.getElementById("reproc-val-delta");
+    const btnReprocess = document.getElementById("btn-reprocess");
+    const btnReprocReset = document.getElementById("btn-reproc-reset");
+
+    if (reprocInputTlow && reprocValTlow) {
+        reprocInputTlow.addEventListener("input", (e) => reprocValTlow.textContent = Number(e.target.value).toFixed(2));
+    }
+    if (reprocInputThigh && reprocValThigh) {
+        reprocInputThigh.addEventListener("input", (e) => reprocValThigh.textContent = Number(e.target.value).toFixed(2));
+    }
+    if (reprocInputDelta && reprocValDelta) {
+        reprocInputDelta.addEventListener("input", (e) => reprocValDelta.textContent = Number(e.target.value).toFixed(2));
+    }
+
+    if (btnReprocReset) {
+        btnReprocReset.addEventListener("click", () => {
+            if (reprocInputTlow) { reprocInputTlow.value = "0.15"; reprocValTlow.textContent = "0.15"; }
+            if (reprocInputThigh) { reprocInputThigh.value = "0.40"; reprocValThigh.textContent = "0.40"; }
+            if (reprocInputDelta) { reprocInputDelta.value = "0.20"; reprocValDelta.textContent = "0.20"; }
+        });
+    }
+
+    if (btnReprocess) {
+        btnReprocess.addEventListener("click", async () => {
+            btnReprocess.disabled = true;
+            btnReprocess.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> กำลังคำนวณใหม่...';
+
+            const tlow = reprocInputTlow ? reprocInputTlow.value : "0.15";
+            const thigh = reprocInputThigh ? reprocInputThigh.value : "0.40";
+            const delta = reprocInputDelta ? reprocInputDelta.value : "0.20";
+
+            try {
+                const res = await fetch(`/api/process/{{ image_id }}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
+                    method: "POST"
+                });
+                if (!res.ok) throw new Error("Re-process failed");
+                // Reload to reflect new overlay, summary metrics, and updated classification table
+                window.location.reload();
+            } catch (err) {
+                alert("เกิดข้อผิดพลาดในการอัปเดต: " + err.message);
+                btnReprocess.disabled = false;
+                btnReprocess.innerHTML = '<i class="fa-solid fa-arrows-rotate mr-1.5"></i> คำนวณและอัปเดตผลบนภาพทันที';
+            }
+        });
+    }
 </script>
 {% endblock %}

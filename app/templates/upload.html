@@ -69,58 +69,49 @@
         <!-- Collapsible Parameters Tuning (Accordion Scrap) -->
         <details class="group sketch-scrap overflow-hidden" open>
             <summary class="cursor-pointer px-4 py-3 text-xs font-display font-bold text-ink flex items-center justify-between select-none">
-                <span class="flex items-center space-x-2">
-                    <i class="fa-solid fa-sliders text-annotation"></i>
-                    <span>ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)</span>
-                    <span id="param-status-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border transition-colors bg-emerald-100 text-emerald-800 border-emerald-300">
-                        ● ค่าเริ่มต้น (Default)
-                    </span>
+                <span class="flex items-center">
+                    <i class="fa-solid fa-sliders mr-2 text-annotation"></i>
+                    ตั้งค่าพารามิเตอร์การประมวลผล (Algorithm Tuning)
                 </span>
                 <i class="fa-solid fa-chevron-down text-ink-muted text-xs transition-transform group-open:rotate-180"></i>
             </summary>
             <div class="p-4 pt-2 border-t-2 border-dashed border-line/60">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
-                    <div id="card-tlow" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
+                    <div id="card-tlow" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">1. ความไวต่อรอยจาง</label>
-                            <span id="val-tlow" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.15</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">ความไวต่อรอยจาง (เริ่มนับ)</label>
+                            <span id="val-tlow" class="font-mono font-bold text-xs text-accent">0.15</span>
                         </div>
-                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-emerald-600 cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ = เว้นว่าง (ตัดรอยลบ/ฝุ่น)</p>
+                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent cursor-pointer">
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ - ว่างแน่นอน (ตัดรอยลบ/รอยเปื้อน)</p>
                     </div>
 
-                    <div id="card-thigh" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
+                    <div id="card-thigh" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">2. ความเข้มที่ฝนชัด</label>
-                            <span id="val-thigh" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.40</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">ความเข้มที่มั่นใจ (ฝนชัด)</label>
+                            <span id="val-thigh" class="font-mono font-bold text-xs text-accent">0.40</span>
                         </div>
-                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-emerald-600 cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ = ฝนแน่นอน (ดินสอ 2B)</p>
+                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent cursor-pointer">
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ - ฝนคำตอบแน่นอน (ดินสอ 2B ปกติ)</p>
                     </div>
 
-                    <div id="card-delta" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between transition-colors">
+                    <div id="card-delta" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">3. ระยะความต่าง</label>
-                            <span id="val-delta" class="font-mono font-bold text-xs px-2 py-0.5 rounded transition-colors bg-emerald-50 text-emerald-800 border border-emerald-300">0.20</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">ระยะห่างความมั่นใจ (กันฝน 2 ข้อ)</label>
+                            <span id="val-delta" class="font-mono font-bold text-xs text-accent">0.20</span>
                         </div>
-                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-emerald-600 cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ = เตือนกำกวม/ฝนซ้ำ</p>
+                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent cursor-pointer">
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ - เตือนข้อกำกวม/อาจฝน 2 ข้อ</p>
                     </div>
                 </div>
 
                 <!-- Reset to Default Button & Helper Note -->
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-2 border-t border-line/40 text-[11px] gap-2">
-                    <span id="param-summary-text" class="font-mono text-emerald-800 font-bold flex items-center">
-                        <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i>
-                        <span>ใช้ค่ามาตรฐาน: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
-                    </span>
-                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="text-ink-muted hover:text-accent font-sans font-bold flex items-center px-2 py-1 rounded border border-transparent transition-colors cursor-pointer">
-                        <i class="fa-solid fa-arrow-rotate-left mr-1"></i>
+                <div class="flex items-center justify-between pt-2 border-t border-line/40 text-[11px]">
+                    <span id="param-summary-text" class="text-ink-muted text-[10px] font-mono">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
+                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-accent hover:text-red-700 active:scale-95 transition-all cursor-pointer">
+                        <i class="fa-solid fa-rotate-left text-xs"></i>
                         <span>รีเซ็ตเป็นค่าเดิม</span>
                     </button>
-                </div>
-            </div>
-        </details>
                 </div>
             </div>
         </details>
@@ -189,5 +180,5 @@ function resetOMRParameters(e) {
     }
 }
 </script>
-<script src="/static/js/upload.js?v=2.6.0"></script>
+<script src="/static/js/upload.js?v=2.7.0"></script>
 {% endblock %}
