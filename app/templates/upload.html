@@ -47,13 +47,14 @@
             </div>
         </div>
 
-        <!-- Selected File Large Preview Viewport -->
+        <!-- Selected File Large Interactive Preview Viewport -->
         <div id="preview-container" class="hidden sketch-sheet p-4 space-y-3 border-2 border-ink">
+            <!-- Header bar with file info and action -->
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-line">
                 <div class="flex items-center space-x-2 overflow-hidden">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>
-                    <strong class="text-xs font-display font-bold text-ink">ภาพกระดาษคำตอบที่เลือก:</strong>
-                    <span id="preview-name" class="text-xs font-mono font-bold text-accent truncate max-w-[200px] sm:max-w-xs">image.jpg</span>
+                    <span id="preview-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>
+                    <strong class="text-xs font-display font-bold text-ink">ภาพกระดาษคำตอบ:</strong>
+                    <span id="preview-name" class="text-xs font-mono font-bold text-accent truncate max-w-[180px] sm:max-w-xs">image.jpg</span>
                     <span id="preview-size" class="text-[11px] font-mono text-ink-muted"></span>
                 </div>
                 <button type="button" id="btn-remove-file" class="btn-sketch-paper text-xs px-2.5 py-1 text-accent hover:bg-red-50 flex items-center space-x-1 cursor-pointer">
@@ -61,8 +62,53 @@
                     <span>เปลี่ยนภาพ</span>
                 </button>
             </div>
-            <div class="bg-ground p-3 rounded border-2 border-line flex items-center justify-center min-h-[300px] max-h-[520px] overflow-auto">
-                <img id="preview-thumbnail" class="max-h-[480px] w-auto max-w-full object-contain rounded border-2 border-ink bg-white shadow-[3px_3px_0_#38352f]" src="" alt="Uploaded Sheet Preview">
+
+            <!-- Pipeline Stage Switcher Tabs -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div class="flex flex-wrap gap-1 text-xs font-display" id="preview-stage-tabs">
+                    <button type="button" class="btn-sketch-red px-2.5 py-1 text-xs stage-tab" data-stage="overlay">
+                        🎯 ผลตรวจ OMR (Overlay)
+                    </button>
+                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="warped">
+                        📐 ดัดระนาบ (Warped)
+                    </button>
+                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="binary">
+                        🔲 ไบนารี (Binary Mask)
+                    </button>
+                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="original">
+                        📷 ภาพต้นฉบับ
+                    </button>
+                </div>
+                <!-- Real-time Quick Metric Badge -->
+                <div id="preview-metrics" class="text-[11px] font-mono py-1 px-2.5 bg-paper rounded border border-line/60 flex items-center space-x-2">
+                    <span class="text-emerald-700 font-bold">✓ ฝนชัด: <span id="live-count-filled" class="tabular-nums">-</span></span>
+                    <span class="text-line">|</span>
+                    <span class="text-amber-700 font-bold">⚠️ รอยจาง/กำกวม: <span id="live-count-ambiguous" class="tabular-nums">-</span></span>
+                    <span class="text-line">|</span>
+                    <span class="text-ink-muted">⬜ ว่าง: <span id="live-count-blank" class="tabular-nums">-</span></span>
+                </div>
+            </div>
+
+            <!-- Rejection Alert (if corners/quality fail) -->
+            <div id="preview-rejection-box" class="hidden p-3 rounded border-2 border-red-500 bg-red-50 text-xs text-red-800 space-y-1">
+                <div class="font-bold flex items-center">
+                    <i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-600"></i>
+                    <span>ไม่สามารถประมวลผลกระดาษคำตอบได้:</span>
+                </div>
+                <p id="preview-rejection-msg" class="text-[11px] font-sans"></p>
+            </div>
+
+            <!-- Image Viewport with Loading Shield -->
+            <div class="relative bg-ground p-3 rounded border-2 border-line flex items-center justify-center min-h-[340px] max-h-[580px] overflow-auto">
+                <img id="preview-thumbnail" class="max-h-[520px] w-auto max-w-full object-contain rounded border-2 border-ink bg-white shadow-[3px_3px_0_#38352f] transition-opacity duration-150" src="" alt="Uploaded Sheet Preview">
+                
+                <!-- Live Re-processing Overlay Indicator -->
+                <div id="preview-loading-overlay" class="hidden absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center space-y-2 select-none z-10">
+                    <div class="w-10 h-10 rounded-full bg-ground border-2 border-ink flex items-center justify-center shadow-[2px_2px_0_#38352f]">
+                        <i class="fa-solid fa-arrows-rotate fa-spin text-accent text-lg"></i>
+                    </div>
+                    <span id="preview-loading-text" class="text-xs font-display font-bold text-ink">กำลังอัปเดตผลตรวจบนภาพ...</span>
+                </div>
             </div>
         </div>
 
@@ -71,7 +117,10 @@
             <summary class="cursor-pointer px-4 py-3 text-xs font-display font-bold text-ink flex items-center justify-between select-none">
                 <span class="flex items-center">
                     <i class="fa-solid fa-sliders mr-2 text-annotation"></i>
-                    ตั้งค่าพารามิเตอร์การประมวลผล (Algorithm Tuning)
+                    ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)
+                    <span id="param-status-badge" class="ml-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        ค่าเริ่มต้น (Default)
+                    </span>
                 </span>
                 <i class="fa-solid fa-chevron-down text-ink-muted text-xs transition-transform group-open:rotate-180"></i>
             </summary>
@@ -79,49 +128,49 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
                     <div id="card-tlow" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">ความไวต่อรอยจาง (เริ่มนับ)</label>
-                            <span id="val-tlow" class="font-mono font-bold text-xs text-accent">0.15</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">1. ความไวต่อรอยจาง (เริ่มนับ)</label>
+                            <span id="val-tlow" class="font-mono font-bold text-xs text-emerald-700">0.15</span>
                         </div>
                         <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ - ว่างแน่นอน (ตัดรอยลบ/รอยเปื้อน)</p>
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ - เว้นว่าง (ตัดรอยลบ/ฝุ่น)</p>
                     </div>
 
                     <div id="card-thigh" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">ความเข้มที่มั่นใจ (ฝนชัด)</label>
-                            <span id="val-thigh" class="font-mono font-bold text-xs text-accent">0.40</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">2. ความเข้มที่ฝนชัด</label>
+                            <span id="val-thigh" class="font-mono font-bold text-xs text-emerald-700">0.40</span>
                         </div>
                         <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ - ฝนคำตอบแน่นอน (ดินสอ 2B ปกติ)</p>
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ - ฝนแน่นอน (ดินสอ 2B)</p>
                     </div>
 
                     <div id="card-delta" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">ระยะห่างความมั่นใจ (กันฝน 2 ข้อ)</label>
-                            <span id="val-delta" class="font-mono font-bold text-xs text-accent">0.20</span>
+                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">3. ระยะความต่าง</label>
+                            <span id="val-delta" class="font-mono font-bold text-xs text-emerald-700">0.20</span>
                         </div>
                         <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ - เตือนข้อกำกวม/อาจฝน 2 ข้อ</p>
+                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ - เตือนกำกวม/ฝนซ้ำ</p>
                     </div>
                 </div>
 
                 <!-- Reset to Default Button & Helper Note -->
                 <div class="flex items-center justify-between pt-2 border-t border-line/40 text-[11px]">
                     <span id="param-summary-text" class="text-ink-muted text-[10px] font-mono">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
-                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-accent hover:text-red-700 active:scale-95 transition-all cursor-pointer">
-                        <i class="fa-solid fa-rotate-left text-xs"></i>
-                        <span>รีเซ็ตเป็นค่าเดิม</span>
+                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-emerald-700 transition-all cursor-pointer">
+                        <i class="fa-solid fa-check text-xs text-emerald-600"></i>
+                        <span>ค่าเริ่มต้น</span>
                     </button>
                 </div>
             </div>
         </details>
 
-        <!-- Progress Indicator -->
+        <!-- Progress Indicator (During initial upload) -->
         <div id="progress-container" class="hidden space-y-1.5 pt-1">
             <div class="flex justify-between text-xs font-mono font-bold text-ink">
                 <span id="progress-text" class="flex items-center">
                     <i class="fa-solid fa-circle-notch fa-spin mr-1.5 text-accent"></i>
-                    กำลังประมวลผล 7-Step Pipeline...
+                    กำลังวิเคราะห์ภาพและตรวจจับพิกัดวงกลม...
                 </span>
                 <span id="progress-percent" class="text-accent">0%</span>
             </div>
@@ -133,8 +182,8 @@
         <!-- Submit Button -->
         <div class="pt-2">
             <button id="btn-process" disabled class="btn-sketch-red w-full py-3 px-5 text-sm font-display font-bold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-play text-xs"></i>
-                <span>เริ่มประมวลผลและตรวจกระดาษคำตอบ</span>
+                <i class="fa-solid fa-file-lines text-xs"></i>
+                <span id="btn-process-label">ดูรายงานผลคะแนนและตารางตรวจคำตอบฉบับเต็ม &rarr;</span>
             </button>
         </div>
     </div>
@@ -142,43 +191,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-function resetOMRParameters(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    const inputTlow = document.getElementById("input-tlow");
-    const inputThigh = document.getElementById("input-thigh");
-    const inputDelta = document.getElementById("input-delta");
-    const valTlow = document.getElementById("val-tlow");
-    const valThigh = document.getElementById("val-thigh");
-    const valDelta = document.getElementById("val-delta");
-
-    if (inputTlow) {
-        inputTlow.value = "0.15";
-        inputTlow.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-    if (inputThigh) {
-        inputThigh.value = "0.40";
-        inputThigh.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-    if (inputDelta) {
-        inputDelta.value = "0.20";
-        inputDelta.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-
-    if (valTlow) valTlow.textContent = "0.15";
-    if (valThigh) valThigh.textContent = "0.40";
-    if (valDelta) valDelta.textContent = "0.20";
-
-    const btn = document.getElementById("btn-reset-params");
-    if (btn) {
-        const oldHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-check text-xs text-green-600"></i> <span class="text-green-700 font-bold">รีเซ็ตเรียบร้อย</span>';
-        setTimeout(() => { btn.innerHTML = oldHtml; }, 1200);
-    }
-}
-</script>
-<script src="/static/js/upload.js?v=2.7.0"></script>
+<script src="/static/js/upload.js?v=20261105_interactive"></script>
 {% endblock %}

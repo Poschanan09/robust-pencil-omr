@@ -377,6 +377,8 @@
     // Live Parameter Re-tuning with Image
     const reprocInputTlow = document.getElementById("reproc-input-tlow");
     const reprocInputThigh = document.getElementById("reproc-input-thigh");
+    const reprocInputTlow = document.getElementById("reproc-input-tlow");
+    const reprocInputThigh = document.getElementById("reproc-input-thigh");
     const reprocInputDelta = document.getElementById("reproc-input-delta");
     const reprocValTlow = document.getElementById("reproc-val-tlow");
     const reprocValThigh = document.getElementById("reproc-val-thigh");
@@ -384,21 +386,41 @@
     const btnReprocess = document.getElementById("btn-reprocess");
     const btnReprocReset = document.getElementById("btn-reproc-reset");
 
-    if (reprocInputTlow && reprocValTlow) {
-        reprocInputTlow.addEventListener("input", (e) => reprocValTlow.textContent = Number(e.target.value).toFixed(2));
-    }
-    if (reprocInputThigh && reprocValThigh) {
-        reprocInputThigh.addEventListener("input", (e) => reprocValThigh.textContent = Number(e.target.value).toFixed(2));
-    }
-    if (reprocInputDelta && reprocValDelta) {
-        reprocInputDelta.addEventListener("input", (e) => reprocValDelta.textContent = Number(e.target.value).toFixed(2));
+    function syncReprocState() {
+        if (!reprocInputTlow || !reprocInputThigh || !reprocInputDelta) return;
+        const tl = Number(reprocInputTlow.value).toFixed(2);
+        const th = Number(reprocInputThigh.value).toFixed(2);
+        const dt = Number(reprocInputDelta.value).toFixed(2);
+
+        if (reprocValTlow) {
+            reprocValTlow.textContent = tl;
+            reprocValTlow.className = (tl !== "0.15") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
+        }
+        if (reprocValThigh) {
+            reprocValThigh.textContent = th;
+            reprocValThigh.className = (th !== "0.40") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
+        }
+        if (reprocValDelta) {
+            reprocValDelta.textContent = dt;
+            reprocValDelta.className = (dt !== "0.20") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
+        }
     }
 
+    [reprocInputTlow, reprocInputThigh, reprocInputDelta].forEach(sl => {
+        if (sl) {
+            sl.addEventListener("input", syncReprocState);
+            sl.addEventListener("change", syncReprocState);
+        }
+    });
+    syncReprocState();
+
     if (btnReprocReset) {
-        btnReprocReset.addEventListener("click", () => {
-            if (reprocInputTlow) { reprocInputTlow.value = "0.15"; reprocValTlow.textContent = "0.15"; }
-            if (reprocInputThigh) { reprocInputThigh.value = "0.40"; reprocValThigh.textContent = "0.40"; }
-            if (reprocInputDelta) { reprocInputDelta.value = "0.20"; reprocValDelta.textContent = "0.20"; }
+        btnReprocReset.addEventListener("click", async () => {
+            if (reprocInputTlow) reprocInputTlow.value = "0.15";
+            if (reprocInputThigh) reprocInputThigh.value = "0.40";
+            if (reprocInputDelta) reprocInputDelta.value = "0.20";
+            syncReprocState();
+            if (btnReprocess) btnReprocess.click();
         });
     }
 
