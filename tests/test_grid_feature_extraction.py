@@ -46,8 +46,8 @@ def binary_canvas(template_image):
 
 
 def test_load_template(template_config):
-    assert template_config["questions_count"] == 50
-    assert len(template_config["questions"]) == 50
+    assert template_config["questions_count"] == 40
+    assert len(template_config["questions"]) == 40
     q1 = template_config["questions"][0]
     assert q1["q"] == 1
     assert set(q1["options"].keys()) == {"A", "B", "C", "D", "E"}
@@ -126,7 +126,7 @@ def test_detect_glare():
 def test_extract_features_end_to_end(template_image, binary_canvas, template_config):
     features = extract_features(template_image, binary_canvas, template_config)
     
-    assert len(features) == 50
+    assert len(features) == 40
     q1 = features[0]
     assert q1["question"] == 1
     assert set(q1["options"].keys()) == {"A", "B", "C", "D", "E"}

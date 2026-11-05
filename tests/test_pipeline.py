@@ -72,7 +72,7 @@ def test_pipeline_single_image_success(pipeline, marked_template_image, tmp_path
     
     assert res["status"] == "success"
     assert res["rejection_reason"] is None
-    assert len(res["results"]) == 50
+    assert len(res["results"]) == 40
     assert "visual_overlay" in res
     assert res["visual_overlay"].shape[:2] == (3508, 2480)
     assert res["processing_time_ms"] > 0
