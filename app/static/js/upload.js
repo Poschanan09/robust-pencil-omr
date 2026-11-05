@@ -101,6 +101,28 @@ document.addEventListener("DOMContentLoaded", () => {
         btnProcess.disabled = true;
     });
 
+    // 1-Click Sample Image Loaders
+    document.querySelectorAll(".btn-sample").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const sampleUrl = btn.getAttribute("data-sample");
+            const sampleName = btn.getAttribute("data-name");
+            try {
+                btn.classList.add("opacity-60");
+                const res = await fetch(sampleUrl);
+                if (!res.ok) throw new Error("File fetch failed");
+                const blob = await res.blob();
+                const file = new File([blob], sampleName, { type: blob.type || "image/jpeg" });
+                handleFileSelection(file);
+                btn.classList.remove("opacity-60");
+                // Scroll smoothly to process button
+                btnProcess.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            } catch (err) {
+                btn.classList.remove("opacity-60");
+                alert("ไม่สามารถโหลดภาพตัวอย่างได้: " + err.message);
+            }
+        });
+    });
+
     // Submit & Process
     btnProcess.addEventListener("click", async () => {
         if (!selectedFile) return;

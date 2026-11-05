@@ -93,13 +93,38 @@
     <div class="sketch-sheet p-5 space-y-3">
         <div class="flex items-center justify-between">
             <h2 class="text-base font-display font-bold text-ink">ภาพจำแนกผลการตรวจกระดาษคำตอบ (Diagnostic Overlay)</h2>
-            <a href="/api/process/{{ image_id }}/debug/overlay" target="_blank" class="text-xs font-mono text-accent hover:underline flex items-center font-bold">
-                <span>[ OPEN FULL IMAGE ]</span>
-                <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px]"></i>
-            </a>
+            <div class="flex items-center space-x-3">
+                <a href="/processing/{{ image_id }}" class="text-xs font-mono text-ink-muted hover:text-ink flex items-center font-bold">
+                    <i class="fa-solid fa-layer-group mr-1.5"></i>
+                    <span>[ ดูขั้นตอน DIP ทั้งหมด ]</span>
+                </a>
+                <a href="/api/process/{{ image_id }}/debug/overlay" target="_blank" class="text-xs font-mono text-accent hover:underline flex items-center font-bold">
+                    <span>[ ดูภาพขนาดเต็ม ]</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px]"></i>
+                </a>
+            </div>
         </div>
         <div class="bg-ground border-2 border-line rounded-lg p-4 flex items-center justify-center max-h-[600px] overflow-auto">
             <img src="/api/process/{{ image_id }}/debug/overlay" class="max-h-[560px] object-contain rounded border-2 border-ink bg-white shadow-[3px_3px_0_#38352f]" alt="Overlay Result">
+        </div>
+        <!-- Visual Legend Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-line/60 text-xs">
+            <div class="flex items-center space-x-2 text-emerald-800">
+                <span class="w-4 h-4 rounded-full border-2 border-emerald-600 bg-emerald-100 flex items-center justify-center font-bold text-[10px]">✓</span>
+                <span class="text-[11px]"><strong>สีเขียว (Filled):</strong> ฝนชัด &ge; T<sub>high</sub></span>
+            </div>
+            <div class="flex items-center space-x-2 text-amber-700">
+                <span class="w-4 h-4 rounded border-2 border-amber-500 bg-amber-100 flex items-center justify-center font-bold text-[10px]">!</span>
+                <span class="text-[11px]"><strong>สีส้ม (Ambiguous):</strong> รอยลบ/กำกวม</span>
+            </div>
+            <div class="flex items-center space-x-2 text-sky-800">
+                <span class="w-4 h-4 rounded-full border border-sky-500 border-dashed bg-sky-50 flex items-center justify-center text-[10px] text-sky-600">•</span>
+                <span class="text-[11px]"><strong>วงกลมประ:</strong> OMR Inner Mask ส่องวัด</span>
+            </div>
+            <div class="flex items-center space-x-2 text-ink-muted">
+                <span class="w-4 h-4 flex items-center justify-center font-bold text-xs text-ink">+</span>
+                <span class="text-[11px]"><strong>จุดพิกัด (+):</strong> กึ่งกลางวงกลม OMR</span>
+            </div>
         </div>
     </div>
 

@@ -45,6 +45,37 @@
                     <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
                 </label>
             </div>
+
+            <!-- Quick-Test Sample Images (Ready-to-Test 1-Click) -->
+            <div class="mt-4 pt-3.5 border-t-2 border-dashed border-line/60">
+                <span class="text-xs font-display font-bold text-ink-muted uppercase tracking-wider block mb-2 flex items-center">
+                    <i class="fa-solid fa-flask-vial mr-1.5 text-accent"></i>
+                    หรือคลิกทดสอบทันทีด้วยภาพตัวอย่าง (Quick Test Samples):
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_1_real_phone_photo.jpg" data-name="sample_1_real_phone_photo.jpg">
+                        <span class="text-xl">📸</span>
+                        <div class="min-w-0">
+                            <strong class="block text-ink text-xs truncate">1. ภาพถ่ายจริงกล้องมือถือ</strong>
+                            <span class="text-[10px] text-ink-muted block truncate">มุมเอียง + เงาโต๊ะ + 50 ข้อสมบูรณ์</span>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_2_filled_sheet.png" data-name="sample_2_filled_sheet.png">
+                        <span class="text-xl">📝</span>
+                        <div class="min-w-0">
+                            <strong class="block text-ink text-xs truncate">2. กระดาษคำตอบ A5 ฝนชัด</strong>
+                            <span class="text-[10px] text-ink-muted block truncate">สแกนระนาบตรง 50 ข้อ ฝน 2B ชัด</span>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-sample btn-sketch-paper text-xs p-2.5 text-left flex items-center space-x-2.5 hover:border-accent transition-colors" data-sample="/static/img/samples/sample_3_ambiguous_erasure.jpg" data-name="sample_3_ambiguous_erasure.jpg">
+                        <span class="text-xl">✏️</span>
+                        <div class="min-w-0">
+                            <strong class="block text-ink text-xs truncate">3. มีรอยลบ / ฝนซ้ำกำกวม</strong>
+                            <span class="text-[10px] text-ink-muted block truncate">ทดสอบ Tri-State & Review Queue</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Selected File Preview (Taped Note) -->
@@ -175,5 +206,5 @@ function resetOMRParameters(e) {
     }
 }
 </script>
-<script src="/static/js/upload.js?v=2.4.0"></script>
+<script src="/static/js/upload.js?v=2.5.0"></script>
 {% endblock %}

@@ -118,6 +118,9 @@ async def get_debug_image(image_id: str, step_name: str):
         img_path = debug_dir / f"{step_clean}.jpg"
         if not img_path.exists():
             img_path = debug_dir / f"{step_clean}.png"
+        if not img_path.exists() and step_clean == "corners":
+            candidates = list(s_dir.glob("original.*"))
+            img_path = candidates[0] if candidates else None
             
     if not img_path or not img_path.exists():
         raise HTTPException(status_code=404, detail=f"Debug image '{step_name}' not found for '{image_id}'.")

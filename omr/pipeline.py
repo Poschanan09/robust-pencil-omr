@@ -143,6 +143,9 @@ class OMRPipeline:
                 "rejection_reason": f"QUALITY_CHECK_FAILED: {quality_res['rejection_reason']}",
                 "quality": quality_res,
                 "recommendation": quality_res["recommendation"],
+                "debug_images": {
+                    "original": raw_image
+                },
                 "processing_time_ms": round((time.perf_counter() - start_time) * 1000, 2)
             }
 
@@ -249,7 +252,12 @@ class OMRPipeline:
                         "method": doc_res.get("method", "failed"),
                         "contour_area": doc_res.get("contour_area")
                     },
-                    "recommendation": "กรุณาถ่ายภาพกระดาษคำตอบให้เห็นขอบกระดาษครบทั้ง 4 มุมบนพื้นผิวที่มีสีตัดกันชัดเจน",
+                    "debug_images": {
+                        "original": raw_image,
+                        "corners": doc_res.get("debug_image", raw_image),
+                        "edges": doc_res.get("edge_map")
+                    },
+                    "recommendation": "กรุณาถ่ายภาพกระดาษคำตอบให้เห็นขอบกระดาษครบทั้ง 4 มุมบนพื้นผิวที่มีสีตัดกันชัดเจน (เช่น วางบนโต๊ะไม้หรือแผ่นรองสีเข้ม)",
                     "processing_time_ms": round((time.perf_counter() - start_time) * 1000, 2)
                 }
 
@@ -313,6 +321,7 @@ class OMRPipeline:
         # Optional: Save debug images
         debug_images_dict = {
             "original": raw_image,
+            "corners": doc_res.get("debug_image", raw_image),
             "edges": doc_res["edge_map"],
             "warped": warped_image,
             "binary": binary_clean,

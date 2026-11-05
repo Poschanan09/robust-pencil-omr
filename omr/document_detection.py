@@ -107,8 +107,8 @@ def detect_document_contour(
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     edge_dilated = cv2.dilate(edge_map, kernel, iterations=1)
     
-    # 2. Extract external contours (Suzuki & Abe, 1985)
-    contours, _ = cv2.findContours(edge_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 2. Extract contours
+    contours, _ = cv2.findContours(edge_dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return None, None, edge_map
         
@@ -135,6 +135,16 @@ def detect_document_contour(
             
     if valid_quads:
         max_area = max(q["area"] for q in valid_quads)
+        
+        # Check if there is an outer paper (e.g. camera photo on table) with an inner printed frame.
+        # The inner printed bounding frame typically spans 76% to 92% of the paper contour area.
+        for outer in [q for q in valid_quads if q["area"] >= 0.90 * max_area]:
+            inners = [q for q in valid_quads if 0.76 * outer["area"] <= q["area"] <= 0.92 * outer["area"]]
+            if inners:
+                inners.sort(key=lambda q: q["area"], reverse=True)
+                chosen = inners[0]
+                return chosen["corners"], chosen["area"], edge_map
+
         # Filter top-tier candidates (within 15% of max area, e.g. dual A5 sheets on A4)
         top_candidates = [q for q in valid_quads if q["area"] >= 0.85 * max_area]
         # Sort top-to-bottom so Sheet 1 (top) is prioritized on uncut sheets

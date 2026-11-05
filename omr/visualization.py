@@ -40,10 +40,12 @@ def draw_overlay(
     q_lookup = {item["q"]: item for item in template_config.get("questions", [])}
     
     # Color definitions (BGR)
-    COLOR_FILLED = (40, 180, 40)       # Green
-    COLOR_AMBIGUOUS = (0, 140, 255)    # Amber / Orange
-    COLOR_BLANK = (180, 180, 180)      # Light Gray
-    COLOR_TEXT = (20, 20, 20)          # Near Black
+    COLOR_FILLED = (40, 200, 40)        # Vibrant Green
+    COLOR_FILLED_INNER = (60, 230, 60)  # Bright Lime Green
+    COLOR_AMBIGUOUS = (0, 140, 255)     # Amber / Orange
+    COLOR_BLANK_RING = (220, 175, 120)  # Soft Slate / Cyan (Subtle sampling ring)
+    COLOR_BLANK_TEXT = (150, 150, 150)  # Muted Gray
+    COLOR_TEXT = (25, 25, 25)           # Near Black
     
     for dec in results:
         q_num = dec["question"]
@@ -58,34 +60,43 @@ def draw_overlay(
             
         options = q_meta["options"]
         
+        # 1. Draw subtle Concentric Inner Sampling Ring & center crosshair on all option bubbles
+        for opt_key, opt_info in options.items():
+            ocx = int(round(opt_info["cx_pct"] * w_canvas))
+            ocy = int(round(opt_info["cy_pct"] * h_canvas))
+            or_px = int(round(opt_info["r_pct"] * w_canvas))
+            inner_r = max(2, int(round(or_px * 0.82)))
+            
+            # Show inner sampling boundary for every bubble
+            is_active_filled = (status == "FILLED" and opt_key == answer)
+            is_active_ambig = (status == "AMBIGUOUS" and opt_key in top_two)
+            
+            if not is_active_filled and not is_active_ambig:
+                cv2.circle(overlay_canvas, (ocx, ocy), inner_r, COLOR_BLANK_RING, 1, cv2.LINE_AA)
+                cv2.drawMarker(overlay_canvas, (ocx, ocy), (190, 190, 190), cv2.MARKER_CROSS, 4, 1)
+
+        # 2. Status-specific annotations
         if status == "FILLED":
-            # Highlight selected choice with thick green circle and label
             chosen_opt = answer
             if chosen_opt and chosen_opt in options:
                 opt_info = options[chosen_opt]
                 cx = int(round(opt_info["cx_pct"] * w_canvas))
                 cy = int(round(opt_info["cy_pct"] * h_canvas))
                 r = int(round(opt_info["r_pct"] * w_canvas))
+                inner_r = max(2, int(round(r * 0.82)))
                 
-                # Draw outer glow and solid boundary
-                cv2.circle(overlay_canvas, (cx, cy), r + 4, COLOR_FILLED, 3)
+                # Double ring: solid outer boundary + glowing inner measurement mask
+                cv2.circle(overlay_canvas, (cx, cy), r + 4, COLOR_FILLED, 3, cv2.LINE_AA)
+                cv2.circle(overlay_canvas, (cx, cy), inner_r, COLOR_FILLED_INNER, 2, cv2.LINE_AA)
                 
-                # Draw checkmark badge beside bubble
+                # Checkmark badge beside bubble with fill %
                 f_val = fill_ratios.get(chosen_opt, 0.0)
-                badge_text = f"✓ {chosen_opt} ({int(f_val*100)}%)"
-                cv2.putText(
-                    overlay_canvas,
-                    badge_text,
-                    (cx - 20, cy - r - 6),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.55,
-                    COLOR_FILLED,
-                    2,
-                    cv2.LINE_AA
-                )
+                badge_text = f"✓ {chosen_opt} ({int(round(f_val*100))}%)"
+                # Text shadow for maximum contrast
+                cv2.putText(overlay_canvas, badge_text, (cx - 24, cy - r - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 3, cv2.LINE_AA)
+                cv2.putText(overlay_canvas, badge_text, (cx - 24, cy - r - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.52, COLOR_FILLED, 2, cv2.LINE_AA)
                 
         elif status == "AMBIGUOUS":
-            # Highlight all candidate choices with orange warning boxes
             opt1 = top_two[0] if len(top_two) > 0 else "A"
             opt2 = top_two[1] if len(top_two) > 1 else "B"
             for opt_key in [opt1, opt2]:
@@ -95,67 +106,71 @@ def draw_overlay(
                     cy = int(round(opt_info["cy_pct"] * h_canvas))
                     r = int(round(opt_info["r_pct"] * w_canvas))
                     
-                    # Draw amber warning square
-                    box_pad = r + 5
+                    # Amber warning box
+                    box_pad = r + 4
                     cv2.rectangle(
                         overlay_canvas,
                         (cx - box_pad, cy - box_pad),
                         (cx + box_pad, cy + box_pad),
                         COLOR_AMBIGUOUS,
-                        3
+                        2,
+                        cv2.LINE_AA
+                    )
+                    f_val = fill_ratios.get(opt_key, 0.0)
+                    cv2.putText(
+                        overlay_canvas,
+                        f"{opt_key}:{int(round(f_val*100))}%",
+                        (cx - 18, cy + r + 16),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.42,
+                        COLOR_AMBIGUOUS,
+                        1,
+                        cv2.LINE_AA
                     )
                     
-            # Draw warning banner above question
+            # Warning banner above question
             opt1_info = options.get(opt1, {})
             if opt1_info:
                 cx1 = int(round(opt1_info["cx_pct"] * w_canvas))
                 cy1 = int(round(opt1_info["cy_pct"] * h_canvas))
-                warning_text = f"? Q{q_num} Review ({opt1}:{int(fill_ratios.get(opt1, 0)*100)}% vs {opt2}:{int(fill_ratios.get(opt2, 0)*100)}%)"
-                cv2.putText(
-                    overlay_canvas,
-                    warning_text,
-                    (cx1 - 35, cy1 - 25),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.50,
-                    COLOR_AMBIGUOUS,
-                    2,
-                    cv2.LINE_AA
-                )
+                warning_text = f"⚠️ Q{q_num} AMBIGUOUS: {opt1} vs {opt2}"
+                cv2.putText(overlay_canvas, warning_text, (cx1 - 25, cy1 - 22), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (255, 255, 255), 3, cv2.LINE_AA)
+                cv2.putText(overlay_canvas, warning_text, (cx1 - 25, cy1 - 22), cv2.FONT_HERSHEY_SIMPLEX, 0.48, COLOR_AMBIGUOUS, 2, cv2.LINE_AA)
                 
         elif status == "BLANK":
-            # Subtle indicator on question number
-            first_opt = options.get("A", {})
-            if first_opt:
-                cx_a = int(round(first_opt["cx_pct"] * w_canvas))
-                cy_a = int(round(first_opt["cy_pct"] * h_canvas))
+            # Clean indicator positioned to the right of option E
+            last_opt = options.get("E", {})
+            if last_opt:
+                cx_e = int(round(last_opt["cx_pct"] * w_canvas))
+                cy_e = int(round(last_opt["cy_pct"] * h_canvas))
                 cv2.putText(
                     overlay_canvas,
-                    "— Blank —",
-                    (cx_a + 25, cy_a + 5),
+                    "—",
+                    (cx_e + 20, cy_e + 4),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.45,
-                    COLOR_BLANK,
+                    COLOR_BLANK_TEXT,
                     1,
                     cv2.LINE_AA
                 )
 
-    # Render Summary Dashboard Header Bar (top of sheet: y=1 to y=45)
+    # Render Summary Dashboard Header Bar (top of sheet: y=0 to y=65)
     total_q = len(results)
     filled_q = sum(1 for d in results if d["status"] == "FILLED")
     blank_q = sum(1 for d in results if d["status"] == "BLANK")
     ambig_q = sum(1 for d in results if d["status"] == "AMBIGUOUS")
     rejection_rate = (ambig_q / total_q * 100) if total_q > 0 else 0.0
 
-    header_h = 75
-    banner_bg = np.full((header_h, w_canvas, 3), (245, 245, 245), dtype=np.uint8)
-    cv2.line(banner_bg, (0, header_h - 1), (w_canvas, header_h - 1), (180, 180, 180), 2)
+    header_h = 65
+    banner_bg = np.full((header_h, w_canvas, 3), (248, 249, 250), dtype=np.uint8)
+    cv2.line(banner_bg, (0, header_h - 1), (w_canvas, header_h - 1), (190, 195, 200), 2)
 
     cv2.putText(
         banner_bg,
-        f"ICE415 OMR Diagnostic Overlay | Total: {total_q} | Filled: {filled_q} | Blank: {blank_q} | Ambiguous: {ambig_q} (Rejection Rate: {rejection_rate:.1f}%)",
-        (40, 48),
+        f"ICE415 Robust Pencil OMR | Total: {total_q} | Filled: {filled_q} (Green) | Blank: {blank_q} (Circles) | Ambiguous: {ambig_q} (Amber)",
+        (30, 42),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.85,
+        0.75,
         COLOR_TEXT,
         2,
         cv2.LINE_AA

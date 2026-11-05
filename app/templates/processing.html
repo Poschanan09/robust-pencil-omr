@@ -109,19 +109,22 @@
             <!-- Tabs -->
             <div class="flex flex-wrap gap-1.5 font-display text-xs" id="visual-tabs">
                 <button class="btn-sketch-red px-3 py-1 text-xs tab-btn" data-target="img-overlay">
-                    1. Overlay ตรวจคำตอบ
+                    🎯 1. Overlay ตรวจคำตอบ
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-binary">
-                    2. Binary Mask (Adaptive)
+                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-corners">
+                    📸 2. ตรวจจับ 4 มุมกระดาษ
                 </button>
                 <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-warped">
-                    3. Warped A4 (Homography)
+                    📐 3. ดัดระนาบ Homography
+                </button>
+                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-binary">
+                    🔲 4. Binary Mask ปรับแสง
                 </button>
                 <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-edges">
-                    4. Canny Edges
+                    ⚡ 5. Canny Edges
                 </button>
                 <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-original">
-                    5. ภาพถ่ายต้นฉบับ
+                    🖼️ 6. ภาพถ่ายต้นฉบับ
                 </button>
             </div>
         </div>
@@ -129,10 +132,31 @@
         <!-- Image Display Viewport (Taped Reference Mount) -->
         <div class="p-6 bg-ground border-2 border-line rounded-lg flex items-center justify-center min-h-[460px] max-h-[720px] overflow-auto relative">
             <img id="img-overlay" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
-            <img id="img-binary" class="max-h-[660px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
+            <img id="img-corners" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/corners" alt="Corner Detection">
             <img id="img-warped" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
+            <img id="img-binary" class="max-h-[660px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
             <img id="img-edges" class="max-h-[660px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
             <img id="img-original" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
+        </div>
+
+        <!-- Visual Legend Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-line/60 text-xs">
+            <div class="flex items-center space-x-2 text-emerald-800">
+                <span class="w-4 h-4 rounded-full border-2 border-emerald-600 bg-emerald-100 flex items-center justify-center font-bold text-[10px]">✓</span>
+                <span class="text-[11px]"><strong>สีเขียว (Filled):</strong> ฝนชัด &ge; T<sub>high</sub></span>
+            </div>
+            <div class="flex items-center space-x-2 text-amber-700">
+                <span class="w-4 h-4 rounded border-2 border-amber-500 bg-amber-100 flex items-center justify-center font-bold text-[10px]">!</span>
+                <span class="text-[11px]"><strong>สีส้ม (Ambiguous):</strong> รอยลบ/กำกวม</span>
+            </div>
+            <div class="flex items-center space-x-2 text-sky-800">
+                <span class="w-4 h-4 rounded-full border border-sky-500 border-dashed bg-sky-50 flex items-center justify-center text-[10px] text-sky-600">•</span>
+                <span class="text-[11px]"><strong>วงกลมประ:</strong> OMR Inner Mask ส่องวัด</span>
+            </div>
+            <div class="flex items-center space-x-2 text-ink-muted">
+                <span class="w-4 h-4 flex items-center justify-center font-bold text-xs text-ink">+</span>
+                <span class="text-[11px]"><strong>จุดพิกัด (+):</strong> กึ่งกลางวงกลม OMR</span>
+            </div>
         </div>
     </div>
 
@@ -200,19 +224,37 @@
     </div>
     {% else %}
     <!-- Rejection Alert Card -->
-    <div class="sketch-sheet p-8 text-center space-y-4 border-2 border-accent bg-[#fef5f5]">
-        <div class="w-12 h-12 rounded border-2 border-accent bg-scrap text-accent flex items-center justify-center text-xl mx-auto shadow-[2px_2px_0_#9e3a2e]">
-            <i class="fa-solid fa-ban"></i>
-        </div>
-        <div class="space-y-1">
+    <div class="sketch-sheet p-6 space-y-4 border-2 border-accent bg-[#fef5f5]">
+        <div class="text-center space-y-2">
+            <div class="w-12 h-12 rounded border-2 border-accent bg-scrap text-accent flex items-center justify-center text-xl mx-auto shadow-[2px_2px_0_#9e3a2e]">
+                <i class="fa-solid fa-ban"></i>
+            </div>
             <h2 class="text-lg font-display font-bold text-accent">ระบบปฏิเสธการประมวลผล (Quality Check Rejection)</h2>
-            <p class="text-xs text-ink-muted max-w-md mx-auto">
-                {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ เช่น มืดเกินไป เบลอ หรือหาขอบกระดาษ A4 ไม่พบ') }}
+            <p class="text-xs text-ink-muted max-w-lg mx-auto">
+                {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ เช่น มืดเกินไป เบลอ หรือหาขอบกระดาษไม่พบ') }}
             </p>
+            {% if data.recommendation %}
+            <p class="text-xs font-bold text-ink max-w-lg mx-auto bg-amber-100/70 p-2 rounded border border-amber-300">
+                💡 คำแนะนำ: {{ data.recommendation }}
+            </p>
+            {% endif %}
         </div>
-        <div class="pt-2">
-            <a href="/upload" class="btn-sketch-red px-4 py-2 text-xs font-display font-bold inline-flex items-center">
-                <i class="fa-solid fa-arrow-rotate-left mr-1.5"></i>ถ่ายภาพและอัปโหลดใหม่
+
+        <!-- Debug preview on rejection -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-line/50">
+            <div class="bg-ground p-3 rounded border border-line text-center">
+                <span class="text-xs font-bold text-ink block mb-2">1. ภาพที่อัปโหลดเข้ามา (Original)</span>
+                <img src="/api/process/{{ image_id }}/debug/original" class="max-h-60 mx-auto rounded border border-ink object-contain" alt="Original">
+            </div>
+            <div class="bg-ground p-3 rounded border border-line text-center">
+                <span class="text-xs font-bold text-ink block mb-2">2. การตรวจจับขอบภาพ (Canny Edges)</span>
+                <img src="/api/process/{{ image_id }}/debug/edges" class="max-h-60 mx-auto rounded border border-ink object-contain bg-black" alt="Canny Edges" onerror="this.parentElement.style.display='none'">
+            </div>
+        </div>
+
+        <div class="text-center pt-2">
+            <a href="/upload" class="btn-sketch-red px-5 py-2 text-xs font-display font-bold inline-flex items-center">
+                <i class="fa-solid fa-arrow-rotate-left mr-1.5"></i>ถ่ายภาพหรือเลือกไฟล์ใหม่
             </a>
         </div>
     </div>
