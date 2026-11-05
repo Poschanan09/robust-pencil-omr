@@ -25,25 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedFile = null;
 
     // Synchronize slider text
-    if (inputTlow) inputTlow.addEventListener("input", (e) => valTlow.textContent = e.target.value);
-    if (inputThigh) inputThigh.addEventListener("input", (e) => valThigh.textContent = e.target.value);
-    if (inputDelta) inputDelta.addEventListener("input", (e) => valDelta.textContent = e.target.value);
+    if (inputTlow) inputTlow.addEventListener("input", (e) => valTlow.textContent = Number(e.target.value).toFixed(2));
+    if (inputThigh) inputThigh.addEventListener("input", (e) => valThigh.textContent = Number(e.target.value).toFixed(2));
+    if (inputDelta) inputDelta.addEventListener("input", (e) => valDelta.textContent = Number(e.target.value).toFixed(2));
 
     // Reset parameters to default values
     const btnResetParams = document.getElementById("btn-reset-params");
     if (btnResetParams) {
-        btnResetParams.addEventListener("click", () => {
-            if (inputTlow) {
-                inputTlow.value = "0.15";
-                valTlow.textContent = "0.15";
-            }
-            if (inputThigh) {
-                inputThigh.value = "0.40";
-                valThigh.textContent = "0.40";
-            }
-            if (inputDelta) {
-                inputDelta.value = "0.20";
-                valDelta.textContent = "0.20";
+        btnResetParams.addEventListener("click", (e) => {
+            if (typeof resetOMRParameters === "function") {
+                resetOMRParameters(e);
             }
         });
     }
