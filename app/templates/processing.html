@@ -46,22 +46,24 @@
             <span class="font-display font-bold text-ink flex items-center">
                 <i class="fa-solid fa-sliders text-accent mr-1.5"></i>พารามิเตอร์ที่ใช้ตรวจรอบนี้:
             </span>
-            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ความไวเริ่มนับ (T<sub>low</sub>): <strong id="param-used-tlow" class="text-accent">{{ data.summary.thresholds_used.t_low|default(0.15) }}</strong>
+            <span class="font-sans bg-paper px-2.5 py-1 rounded border border-line text-ink font-semibold">
+                ความไวเริ่มนับ (T<sub>low</sub>): <strong id="param-used-tlow" class="text-accent font-mono">{{ data.summary.thresholds_used.t_low|default(0.15) }}</strong>
             </span>
-            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ความเข้มฝนชัด (T<sub>high</sub>): <strong id="param-used-thigh" class="text-accent">{{ data.summary.thresholds_used.t_high|default(0.40) }}</strong>
+            <span class="font-sans bg-paper px-2.5 py-1 rounded border border-line text-ink font-semibold">
+                ความเข้มฝนชัด (T<sub>high</sub>): <strong id="param-used-thigh" class="text-accent font-mono">{{ data.summary.thresholds_used.t_high|default(0.40) }}</strong>
             </span>
-            <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ระยะห่างความต่าง (&Delta;F): <strong id="param-used-delta" class="text-accent">{{ data.summary.thresholds_used.delta_min|default(0.20) }}</strong>
+            <span class="font-sans bg-paper px-2.5 py-1 rounded border border-line text-ink font-semibold">
+                ระยะห่างความต่าง (&Delta;F): <strong id="param-used-delta" class="text-accent font-mono">{{ data.summary.thresholds_used.delta_min|default(0.20) }}</strong>
             </span>
         </div>
         <div>
-            <span id="param-used-badge" class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}bg-red-100 text-red-700 border border-red-400{% else %}bg-emerald-100 text-emerald-800 border border-emerald-300{% endif %} flex items-center">
-                {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}
-                <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>ปรับแต่งเอง (Customized)
+            <span id="param-used-badge" class="px-2.5 py-1 rounded text-xs font-display font-bold {% if data.summary.thresholds_used and data.summary.thresholds_used.is_auto_calibrated %}bg-emerald-50 text-emerald-800 border border-emerald-300{% elif data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}bg-red-50 text-red-700 border border-red-300{% else %}bg-emerald-50 text-emerald-800 border border-emerald-300{% endif %} flex items-center">
+                {% if data.summary.thresholds_used and data.summary.thresholds_used.is_auto_calibrated %}
+                <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-emerald-600"></i> วิเคราะห์อัตโนมัติ (Auto-Calibrated)
+                {% elif data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}
+                <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span> ปรับแต่งเอง (Customized)
                 {% else %}
-                <span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>ค่ามาตรฐาน (Default)
+                <i class="fa-solid fa-check mr-1.5 text-emerald-600"></i> ค่ามาตรฐาน (Default)
                 {% endif %}
             </span>
         </div>
@@ -176,32 +178,32 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-line/60 text-xs">
             <div class="flex items-center space-x-2 text-emerald-800">
                 <span class="w-4 h-4 rounded-full border-2 border-emerald-600 bg-emerald-100 flex items-center justify-center font-bold text-[10px]">✓</span>
-                <span class="text-[11px]"><strong>สีเขียว (Filled):</strong> ฝนชัด &ge; T<sub>high</sub></span>
+                <span class="text-[11px] font-sans"><strong>สีเขียว (Filled):</strong> ฝนชัด &ge; T<sub>high</sub></span>
             </div>
             <div class="flex items-center space-x-2 text-amber-700">
                 <span class="w-4 h-4 rounded border-2 border-amber-500 bg-amber-100 flex items-center justify-center font-bold text-[10px]">!</span>
-                <span class="text-[11px]"><strong>สีส้ม (Ambiguous):</strong> รอยลบ/กำกวม</span>
+                <span class="text-[11px] font-sans"><strong>สีส้ม (Ambiguous):</strong> รอยลบ/กำกวม</span>
             </div>
             <div class="flex items-center space-x-2 text-sky-800">
                 <span class="w-4 h-4 rounded-full border border-sky-500 border-dashed bg-sky-50 flex items-center justify-center text-[10px] text-sky-600">•</span>
-                <span class="text-[11px]"><strong>วงกลมประ:</strong> OMR Inner Mask ส่องวัด</span>
+                <span class="text-[11px] font-sans"><strong>วงกลมประ:</strong> OMR Inner Mask ส่องวัด</span>
             </div>
             <div class="flex items-center space-x-2 text-ink-muted">
                 <span class="w-4 h-4 flex items-center justify-center font-bold text-xs text-ink">+</span>
-                <span class="text-[11px]"><strong>จุดพิกัด (+):</strong> กึ่งกลางวงกลม OMR</span>
+                <span class="text-[11px] font-sans"><strong>จุดพิกัด (+):</strong> กึ่งกลางวงกลม OMR</span>
             </div>
         </div>
     </div>
 
-    <!-- Live Interactive Parameter Tuning with Image -->
+    <!-- Live Interactive Parameter Fine-Tuning with Image -->
     <div class="sketch-sheet p-5 space-y-4 border-2 border-line bg-[#fffdfa]">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line/60">
             <div>
                 <h3 class="text-sm font-display font-bold text-ink flex items-center">
                     <i class="fa-solid fa-sliders text-accent mr-2"></i>
-                    ปรับจูนพารามิเตอร์แบบเรียลไทม์กับภาพนี้ (Live Tuning on This Sheet)
+                    ปรับจูนพารามิเตอร์เพิ่มเติมกับภาพนี้ (Fine-Tuning on This Sheet)
                 </h3>
-                <p class="text-[11px] text-ink-muted">เลื่อนปรับระดับความไวของดินสอ แล้วระบบจะอัปเดตผลตรวจบนภาพทันที</p>
+                <p class="text-[11px] font-sans text-ink-muted">ระบบทำการวิเคราะห์ความไวที่แม่นยำให้อัตโนมัติ หากต้องการปรับแต่งเฉพาะแผ่นนี้สามารถเลื่อนสไลเดอร์ได้ทันที</p>
             </div>
             <div class="flex items-center space-x-2">
                 <button type="button" id="btn-reprocess" class="btn-sketch-red px-4 py-2 text-xs font-display font-bold flex items-center space-x-1.5 shadow-[2px_2px_0_#38352f] cursor-pointer">
@@ -212,46 +214,55 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+            <div class="p-3 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">1. ความไวต่อรอยจาง (เริ่มนับ)</label>
+                    <label class="text-xs font-display font-bold text-ink truncate pr-1">1. ความไวต่อรอยจาง (เริ่มนับ)</label>
                     <span id="reproc-val-tlow" class="font-mono font-bold text-xs text-accent">
                         {{ data.summary.thresholds_used.t_low|default(0.15) }}
                     </span>
                 </div>
                 <input type="range" id="reproc-input-tlow" min="0.05" max="0.30" step="0.01" value="{{ data.summary.thresholds_used.t_low|default(0.15) }}" class="w-full accent-accent cursor-pointer">
-                <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ = เว้นว่าง (Blank)</p>
+                <p class="text-[10px] font-sans text-ink-muted mt-1 leading-tight">จางกว่านี้ = เว้นว่าง (Blank)</p>
             </div>
 
-            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+            <div class="p-3 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">2. ความเข้มที่มั่นใจ (ฝนชัด)</label>
+                    <label class="text-xs font-display font-bold text-ink truncate pr-1">2. ความเข้มที่มั่นใจ (ฝนชัด)</label>
                     <span id="reproc-val-thigh" class="font-mono font-bold text-xs text-accent">
                         {{ data.summary.thresholds_used.t_high|default(0.40) }}
                     </span>
                 </div>
-                <input type="range" id="reproc-input-thigh" min="0.25" max="0.65" step="0.01" value="{{ data.summary.thresholds_used.t_high|default(0.40) }}" class="w-full accent-accent cursor-pointer">
-                <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ = ฝนคำตอบชัดเจน (Filled)</p>
+                <input type="range" id="reproc-input-thigh" min="0.15" max="0.65" step="0.01" value="{{ data.summary.thresholds_used.t_high|default(0.40) }}" class="w-full accent-accent cursor-pointer">
+                <p class="text-[10px] font-sans text-ink-muted mt-1 leading-tight">เข้มเกินนี้ = ฝนคำตอบชัดเจน (Filled)</p>
             </div>
 
-            <div class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
+            <div class="p-3 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1.5">
-                    <label class="text-[11px] font-display font-bold text-ink truncate pr-1">3. ระยะห่างความต่าง (&Delta;F)</label>
+                    <label class="text-xs font-display font-bold text-ink truncate pr-1">3. ระยะห่างความต่าง (&Delta;F)</label>
                     <span id="reproc-val-delta" class="font-mono font-bold text-xs text-accent">
                         {{ data.summary.thresholds_used.delta_min|default(0.20) }}
                     </span>
                 </div>
-                <input type="range" id="reproc-input-delta" min="0.10" max="0.35" step="0.01" value="{{ data.summary.thresholds_used.delta_min|default(0.20) }}" class="w-full accent-accent cursor-pointer">
-                <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ = เตือนกำกวม (Ambiguous)</p>
+                <input type="range" id="reproc-input-delta" min="0.05" max="0.35" step="0.01" value="{{ data.summary.thresholds_used.delta_min|default(0.20) }}" class="w-full accent-accent cursor-pointer">
+                <p class="text-[10px] font-sans text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ = เตือนกำกวม (Ambiguous)</p>
             </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-line/40 text-[11px]">
-            <span class="text-ink-muted text-[10px] font-mono">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
-            <button type="button" id="btn-reproc-reset" class="font-display font-bold text-xs flex items-center space-x-1.5 text-accent hover:text-red-700 transition-all cursor-pointer">
-                <i class="fa-solid fa-rotate-left text-xs"></i>
-                <span>รีเซ็ตเป็นค่าเริ่มต้น</span>
-            </button>
+        <!-- Clean Sketchbook Quick Actions Row -->
+        <div class="flex flex-wrap items-center justify-between pt-2.5 border-t border-line/40 text-xs gap-2">
+            <span id="reproc-summary-note" class="font-sans text-[11px] text-ink-muted">
+                💡 ปรับเปลี่ยนพารามิเตอร์เพื่อให้ผลการตรวจสอดคล้องกับความเข้มของดินสอในแผ่นนี้
+            </span>
+            <div class="flex items-center space-x-2">
+                <button type="button" id="btn-reproc-autocalib" class="btn-sketch-paper text-xs px-3 py-1 text-emerald-800 hover:text-emerald-900 flex items-center space-x-1 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-emerald-600"></i>
+                    <span>คำนวณอัตโนมัติ (Auto-Calibrate)</span>
+                </button>
+                <button type="button" id="btn-reproc-reset" class="btn-sketch-paper text-xs px-3 py-1 text-ink-muted hover:text-ink flex items-center space-x-1 cursor-pointer">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                    <span>คืนค่ามาตรฐาน (0.15 | 0.40)</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -395,7 +406,6 @@
             const targetImg = document.getElementById(currentTabTarget);
             if (targetImg) {
                 targetImg.classList.remove('hidden');
-                // Ensure image re-renders if needed
                 if (!targetImg.src.includes('?t=')) {
                     targetImg.src = targetImg.src + '?t=' + Date.now();
                 }
@@ -403,7 +413,7 @@
         });
     });
 
-    // Live Parameter Re-tuning with Image
+    // Fine-Tuning Controller
     const reprocInputTlow = document.getElementById("reproc-input-tlow");
     const reprocInputThigh = document.getElementById("reproc-input-thigh");
     const reprocInputDelta = document.getElementById("reproc-input-delta");
@@ -413,6 +423,7 @@
     const btnReprocess = document.getElementById("btn-reprocess");
     const btnReprocessLabel = document.getElementById("btn-reprocess-label");
     const btnReprocReset = document.getElementById("btn-reproc-reset");
+    const btnReprocAutocalib = document.getElementById("btn-reproc-autocalib");
     const imageLoadingOverlay = document.getElementById("image-loading-overlay");
 
     // Summary Metric Elements
@@ -437,21 +448,12 @@
         const th = Number(reprocInputThigh.value).toFixed(2);
         const dt = Number(reprocInputDelta.value).toFixed(2);
 
-        if (reprocValTlow) {
-            reprocValTlow.textContent = tl;
-            reprocValTlow.className = (tl !== "0.15") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
-        }
-        if (reprocValThigh) {
-            reprocValThigh.textContent = th;
-            reprocValThigh.className = (th !== "0.40") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
-        }
-        if (reprocValDelta) {
-            reprocValDelta.textContent = dt;
-            reprocValDelta.className = (dt !== "0.20") ? "font-mono font-bold text-xs text-accent" : "font-mono font-bold text-xs text-emerald-700";
-        }
+        if (reprocValTlow) reprocValTlow.textContent = tl;
+        if (reprocValThigh) reprocValThigh.textContent = th;
+        if (reprocValDelta) reprocValDelta.textContent = dt;
     }
 
-    async function executeReprocess() {
+    async function executeReprocess(isAuto = false) {
         if (isReprocessing) return;
         isReprocessing = true;
 
@@ -463,14 +465,16 @@
         const thigh = reprocInputThigh ? reprocInputThigh.value : "0.40";
         const delta = reprocInputDelta ? reprocInputDelta.value : "0.20";
 
+        const url = isAuto
+            ? `/api/process/{{ image_id }}?auto_calibrate=true`
+            : `/api/process/{{ image_id }}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}&auto_calibrate=false`;
+
         try {
-            const res = await fetch(`/api/process/{{ image_id }}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
-                method: "POST"
-            });
+            const res = await fetch(url, { method: "POST" });
             if (!res.ok) throw new Error("Re-process failed");
             const resultData = await res.json();
 
-            // Refresh all visible images with timestamp cache-buster
+            // Refresh image views
             const ts = Date.now();
             const overlayImg = document.getElementById("img-overlay");
             if (overlayImg) overlayImg.src = `/api/process/{{ image_id }}/debug/overlay?t=${ts}`;
@@ -479,19 +483,27 @@
                 targetImg.src = targetImg.src.split('?')[0] + `?t=${ts}`;
             }
 
-            // Update top parameter badges
-            if (paramUsedTlow) paramUsedTlow.textContent = Number(tlow).toFixed(2);
-            if (paramUsedThigh) paramUsedThigh.textContent = Number(thigh).toFixed(2);
-            if (paramUsedDelta) paramUsedDelta.textContent = Number(delta).toFixed(2);
+            // If auto-calibrated, sync sliders to the auto-calculated values
+            if (resultData.summary && resultData.summary.thresholds_used) {
+                const tu = resultData.summary.thresholds_used;
+                if (reprocInputTlow) reprocInputTlow.value = tu.t_low;
+                if (reprocInputThigh) reprocInputThigh.value = tu.t_high;
+                if (reprocInputDelta) reprocInputDelta.value = tu.delta_min;
+                syncReprocState();
 
-            const isCustom = (Number(tlow) !== 0.15 || Number(thigh) !== 0.40 || Number(delta) !== 0.20);
-            if (paramUsedBadge) {
-                paramUsedBadge.className = isCustom
-                    ? "px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-red-100 text-red-700 border border-red-400 flex items-center"
-                    : "px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center";
-                paramUsedBadge.innerHTML = isCustom
-                    ? '<span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>ปรับแต่งเอง (Customized)'
-                    : '<span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>ค่ามาตรฐาน (Default)';
+                if (paramUsedTlow) paramUsedTlow.textContent = Number(tu.t_low).toFixed(2);
+                if (paramUsedThigh) paramUsedThigh.textContent = Number(tu.t_high).toFixed(2);
+                if (paramUsedDelta) paramUsedDelta.textContent = Number(tu.delta_min).toFixed(2);
+
+                if (paramUsedBadge) {
+                    if (tu.is_auto_calibrated) {
+                        paramUsedBadge.className = "px-2.5 py-1 rounded text-xs font-display font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center";
+                        paramUsedBadge.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-emerald-600"></i> วิเคราะห์อัตโนมัติ (Auto-Calibrated)';
+                    } else {
+                        paramUsedBadge.className = "px-2.5 py-1 rounded text-xs font-display font-bold bg-red-50 text-red-700 border border-red-300 flex items-center";
+                        paramUsedBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span> ปรับแต่งเอง (Customized)';
+                    }
+                }
             }
 
             // Update Summary Metrics
@@ -542,7 +554,7 @@
         syncReprocState();
         if (reprocDebounceTimer) clearTimeout(reprocDebounceTimer);
         reprocDebounceTimer = setTimeout(() => {
-            executeReprocess();
+            executeReprocess(false);
         }, 250);
     }
 
@@ -560,12 +572,18 @@
             if (reprocInputThigh) reprocInputThigh.value = "0.40";
             if (reprocInputDelta) reprocInputDelta.value = "0.20";
             syncReprocState();
-            executeReprocess();
+            executeReprocess(false);
+        });
+    }
+
+    if (btnReprocAutocalib) {
+        btnReprocAutocalib.addEventListener("click", () => {
+            executeReprocess(true);
         });
     }
 
     if (btnReprocess) {
-        btnReprocess.addEventListener("click", executeReprocess);
+        btnReprocess.addEventListener("click", () => executeReprocess(false));
     }
 </script>
 {% endblock %}

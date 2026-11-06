@@ -30,7 +30,8 @@ async def process_image_endpoint(
     t_low: float = Query(0.15, ge=0.0, le=1.0),
     t_high: float = Query(0.40, ge=0.0, le=1.0),
     delta_min: float = Query(0.20, ge=0.0, le=1.0),
-    use_morphology: bool = Query(True)
+    use_morphology: bool = Query(True),
+    auto_calibrate: Optional[bool] = Query(None)
 ) -> Dict[str, Any]:
     """Execute the 7-step OMR processing pipeline on an uploaded image session.
     
@@ -40,6 +41,7 @@ async def process_image_endpoint(
         t_high: Upper fill-ratio threshold for filled bubbles.
         delta_min: Minimum contrast margin required.
         use_morphology: Whether to apply Mathematical Morphology (Closing & Opening).
+        auto_calibrate: Whether to auto-calibrate optimal thresholds per sheet (Otsu clustering).
     """
     try:
         s_dir = SessionStorage.get_session_dir(image_id)
@@ -52,12 +54,21 @@ async def process_image_endpoint(
             raise HTTPException(status_code=404, detail=f"Original image for '{image_id}' missing.")
         orig_path = candidates[0]
         
-        # Initialize pipeline with specified thresholds if different from defaults
+        # If auto_calibrate is not explicitly passed:
+        # Auto-calibrate if default parameters were submitted; otherwise respect manual fine-tuning
+        if auto_calibrate is None:
+            is_default = (round(t_low, 2) == 0.15 and round(t_high, 2) == 0.40 and round(delta_min, 2) == 0.20)
+            should_auto_calibrate = is_default
+        else:
+            should_auto_calibrate = auto_calibrate
+        
+        # Initialize pipeline
         pipeline = OMRPipeline(
             t_low=t_low,
             t_high=t_high,
             delta_min=delta_min,
-            use_morphology=use_morphology
+            use_morphology=use_morphology,
+            auto_calibrate=should_auto_calibrate
         )
         
         result = pipeline.process_single_image(orig_path)

@@ -45,7 +45,8 @@ class OMRPipeline:
         t_low: float = 0.15,
         t_high: float = 0.40,
         delta_min: float = 0.20,
-        use_morphology: bool = True
+        use_morphology: bool = True,
+        auto_calibrate: bool = True
     ):
         """Initialize the pipeline with configurable parameters and template definitions.
         
@@ -55,6 +56,7 @@ class OMRPipeline:
             t_high: Upper fill-ratio boundary for filled bubbles.
             delta_min: Minimum margin required between top two choices.
             use_morphology: Whether to apply Morphological Closing and Opening in Step 4.
+            auto_calibrate: Whether to automatically analyze and calibrate thresholds per sheet.
         """
         self.template_config = load_template(template_config_path)
         self.t_low = float(t_low)
@@ -62,10 +64,15 @@ class OMRPipeline:
         self.delta_min = float(delta_min)
         self.use_morphology = bool(use_morphology)
         
+        # If user explicitly passed custom thresholds different from defaults, respect manual overrides
+        is_default_params = (self.t_low == 0.15 and self.t_high == 0.40 and self.delta_min == 0.20)
+        self.auto_calibrate = bool(auto_calibrate and is_default_params)
+        
         self.decision_engine = TriStateDecisionEngine(
             t_low=self.t_low,
             t_high=self.t_high,
-            delta_min=self.delta_min
+            delta_min=self.delta_min,
+            auto_calibrate=self.auto_calibrate
         )
 
     def process_single_image(

@@ -1,4 +1,4 @@
-// Interactive Upload & Live OMR Inspection Script
+// Upload & Auto-Calibrated OMR Preview Script
 // Course: ICE415 Digital Image Processing (KMUTT)
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewRejectionBox = document.getElementById("preview-rejection-box");
     const previewRejectionMsg = document.getElementById("preview-rejection-msg");
     const previewStatusDot = document.getElementById("preview-status-dot");
+    const liveCalibBadge = document.getElementById("live-calib-badge");
     
     // Live counts
     const liveCountFilled = document.getElementById("live-count-filled");
@@ -26,168 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Stage Switcher Tabs
     const stageTabs = document.querySelectorAll(".stage-tab");
     
-    // Sliders & Values
-    const inputTlow = document.getElementById("input-tlow");
-    const inputThigh = document.getElementById("input-thigh");
-    const inputDelta = document.getElementById("input-delta");
-    const valTlow = document.getElementById("val-tlow");
-    const valThigh = document.getElementById("val-thigh");
-    const valDelta = document.getElementById("val-delta");
-    const paramStatusBadge = document.getElementById("param-status-badge");
-    const paramSummaryText = document.getElementById("param-summary-text");
-    const btnResetParams = document.getElementById("btn-reset-params");
-    
-    // Submit & Progress
+    // Submit
     const btnProcess = document.getElementById("btn-process");
     const btnProcessLabel = document.getElementById("btn-process-label");
-    const progressContainer = document.getElementById("progress-container");
-    const progressBar = document.getElementById("progress-bar");
-    const progressText = document.getElementById("progress-text");
-    const progressPercent = document.getElementById("progress-percent");
-
-    const DEFAULT_TLOW = "0.15";
-    const DEFAULT_THIGH = "0.40";
-    const DEFAULT_DELTA = "0.20";
 
     let currentSessionId = null;
     let currentStage = "overlay";
     let isProcessing = false;
-    let debounceTimer = null;
 
-    // --- 1. Parameter State Management (Red / Green toggling) ---
-    function updateParameterState() {
-        if (!inputTlow || !inputThigh || !inputDelta) return;
-
-        const tlow = Number(inputTlow.value).toFixed(2);
-        const thigh = Number(inputThigh.value).toFixed(2);
-        const delta = Number(inputDelta.value).toFixed(2);
-
-        if (valTlow) valTlow.textContent = tlow;
-        if (valThigh) valThigh.textContent = thigh;
-        if (valDelta) valDelta.textContent = delta;
-
-        const isTlowChanged = (tlow !== DEFAULT_TLOW);
-        const isThighChanged = (thigh !== DEFAULT_THIGH);
-        const isDeltaChanged = (delta !== DEFAULT_DELTA);
-        const isAnyChanged = isTlowChanged || isThighChanged || isDeltaChanged;
-
-        // Individual Value Colors
-        if (valTlow) {
-            valTlow.className = isTlowChanged
-                ? "font-mono font-bold text-xs text-accent"
-                : "font-mono font-bold text-xs text-emerald-700";
-        }
-        if (valThigh) {
-            valThigh.className = isThighChanged
-                ? "font-mono font-bold text-xs text-accent"
-                : "font-mono font-bold text-xs text-emerald-700";
-        }
-        if (valDelta) {
-            valDelta.className = isDeltaChanged
-                ? "font-mono font-bold text-xs text-accent"
-                : "font-mono font-bold text-xs text-emerald-700";
-        }
-
-        // Header Status Badge & Reset Button
-        if (isAnyChanged) {
-            if (paramStatusBadge) {
-                paramStatusBadge.textContent = "ปรับแต่งเอง (Customized)";
-                paramStatusBadge.className = "ml-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-100 text-red-800 border border-red-300";
-            }
-            if (paramSummaryText) {
-                paramSummaryText.innerHTML = `<span class="text-accent font-bold">ใช้ค่าปรับแต่ง: เริ่มนับ ${tlow} | ฝนชัด ${thigh} | ระยะห่าง ${delta}</span>`;
-            }
-            if (btnResetParams) {
-                btnResetParams.innerHTML = '<i class="fa-solid fa-rotate-left text-xs"></i> <span class="font-bold underline text-accent">รีเซ็ตเป็นค่าเดิม</span>';
-                btnResetParams.className = "font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-accent hover:text-red-800 transition-all cursor-pointer";
-            }
-        } else {
-            if (paramStatusBadge) {
-                paramStatusBadge.textContent = "ค่าเริ่มต้น (Default)";
-                paramStatusBadge.className = "ml-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
-            }
-            if (paramSummaryText) {
-                paramSummaryText.textContent = "ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20";
-            }
-            if (btnResetParams) {
-                btnResetParams.innerHTML = '<i class="fa-solid fa-check text-xs text-emerald-600"></i> <span class="text-emerald-700 font-bold">ค่าเริ่มต้น</span>';
-                btnResetParams.className = "font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-emerald-700 transition-all cursor-pointer";
-            }
-        }
-    }
-
-    // --- 2. Live Re-processing with Image Feedback (Debounced) ---
-    async function triggerLiveReprocess() {
-        if (!currentSessionId || isProcessing) return;
-
-        const tlow = inputTlow ? inputTlow.value : DEFAULT_TLOW;
-        const thigh = inputThigh ? inputThigh.value : DEFAULT_THIGH;
-        const delta = inputDelta ? inputDelta.value : DEFAULT_DELTA;
-
-        if (previewLoadingOverlay) {
-            previewLoadingOverlay.classList.remove("hidden");
-            if (previewLoadingText) previewLoadingText.textContent = "กำลังคำนวณและอัปเดตผลตรวจบนภาพ...";
-        }
-
-        try {
-            const res = await fetch(`/api/process/${currentSessionId}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
-                method: "POST"
-            });
-            if (!res.ok) throw new Error("Re-process failed");
-            const resultData = await res.json();
-
-            // Update live metrics
-            if (resultData.summary) {
-                if (liveCountFilled) liveCountFilled.textContent = resultData.summary.filled_count ?? 0;
-                if (liveCountAmbiguous) liveCountAmbiguous.textContent = resultData.summary.ambiguous_count ?? 0;
-                if (liveCountBlank) liveCountBlank.textContent = resultData.summary.blank_count ?? 0;
-            }
-
-            // Refresh Image Viewport with Cache-Buster
-            refreshPreviewImage();
-
-        } catch (err) {
-            console.error("Live tuning update error:", err);
-        } finally {
-            if (previewLoadingOverlay) {
-                previewLoadingOverlay.classList.add("hidden");
-            }
-        }
-    }
-
-    function onSliderChange() {
-        updateParameterState();
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            triggerLiveReprocess();
-        }, 220);
-    }
-
-    [inputTlow, inputThigh, inputDelta].forEach(slider => {
-        if (slider) {
-            slider.addEventListener("input", onSliderChange);
-            slider.addEventListener("change", onSliderChange);
-        }
-    });
-
-    // --- 3. Reset Button Action ---
-    window.resetOMRParameters = function(e) {
-        if (e && e.preventDefault) e.preventDefault();
-        if (e && e.stopPropagation) e.stopPropagation();
-
-        if (inputTlow) inputTlow.value = DEFAULT_TLOW;
-        if (inputThigh) inputThigh.value = DEFAULT_THIGH;
-        if (inputDelta) inputDelta.value = DEFAULT_DELTA;
-
-        updateParameterState();
-        triggerLiveReprocess();
-    };
-
-    if (btnResetParams) {
-        btnResetParams.addEventListener("click", window.resetOMRParameters);
-    }
-
-    // --- 4. Stage Tab Switching ---
+    // --- 1. Stage Tab Switching ---
     function refreshPreviewImage() {
         if (!currentSessionId || !previewThumbnail) return;
         const targetUrl = `/api/process/${currentSessionId}/debug/${currentStage}?t=${Date.now()}`;
@@ -202,15 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             stageTabs.forEach(t => {
                 t.className = (t === tab)
-                    ? "btn-sketch-red px-2.5 py-1 text-xs stage-tab"
-                    : "btn-sketch-paper px-2.5 py-1 text-xs stage-tab";
+                    ? "btn-sketch-red px-2.5 py-1 text-xs stage-tab cursor-pointer"
+                    : "btn-sketch-paper px-2.5 py-1 text-xs stage-tab cursor-pointer";
             });
 
             refreshPreviewImage();
         });
     });
 
-    // --- 5. File Selection & Instant Pipeline Execution ---
+    // --- 2. File Selection & Auto-Calibrated Pipeline Execution ---
     async function handleFileSelection(file) {
         if (!file.type.startsWith("image/")) {
             alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, BMP)");
@@ -227,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dropZone) dropZone.classList.add("hidden");
         if (previewRejectionBox) previewRejectionBox.classList.add("hidden");
 
-        // Local instant thumbnail preview
+        // Temporary local thumbnail preview
         const reader = new FileReader();
         reader.onload = (e) => {
             if (previewThumbnail) previewThumbnail.src = e.target.result;
@@ -237,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Show loading progress
         if (previewLoadingOverlay) {
             previewLoadingOverlay.classList.remove("hidden");
-            if (previewLoadingText) previewLoadingText.textContent = "กำลังวิเคราะห์ภาพและตรวจจับรอยฝนดินสอ...";
+            if (previewLoadingText) previewLoadingText.textContent = "กำลังวิเคราะห์ภาพและคำนวณผล OMR อัตโนมัติ...";
         }
         if (btnProcess) btnProcess.disabled = true;
 
@@ -260,12 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const uploadData = await uploadRes.json();
             currentSessionId = uploadData.image_id;
 
-            // 2. Process with current parameters
-            const tlow = inputTlow ? inputTlow.value : DEFAULT_TLOW;
-            const thigh = inputThigh ? inputThigh.value : DEFAULT_THIGH;
-            const delta = inputDelta ? inputDelta.value : DEFAULT_DELTA;
-
-            const procRes = await fetch(`/api/process/${currentSessionId}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
+            // 2. Process with Auto-Calibration
+            const procRes = await fetch(`/api/process/${currentSessionId}`, {
                 method: "POST"
             });
 
@@ -296,8 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Update stage tabs style
             stageTabs.forEach(t => {
                 t.className = (t.dataset.stage === currentStage)
-                    ? "btn-sketch-red px-2.5 py-1 text-xs stage-tab"
-                    : "btn-sketch-paper px-2.5 py-1 text-xs stage-tab";
+                    ? "btn-sketch-red px-2.5 py-1 text-xs stage-tab cursor-pointer"
+                    : "btn-sketch-paper px-2.5 py-1 text-xs stage-tab cursor-pointer";
             });
 
             // Update live metrics
@@ -305,6 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (liveCountFilled) liveCountFilled.textContent = procData.summary.filled_count ?? 0;
                 if (liveCountAmbiguous) liveCountAmbiguous.textContent = procData.summary.ambiguous_count ?? 0;
                 if (liveCountBlank) liveCountBlank.textContent = procData.summary.blank_count ?? 0;
+                
+                const thresh = procData.summary.thresholds_used;
+                if (thresh && liveCalibBadge) {
+                    liveCalibBadge.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-emerald-600"></i> วิเคราะห์ความไวอัตโนมัติ (เริ่มนับ ${thresh.t_low} | ฝนชัด ${thresh.t_high})`;
+                }
             }
 
             // Display the processed overlay image
@@ -327,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 6. Input Event Listeners ---
+    // --- 3. Input Event Listeners ---
     if (dropZone) {
         ["dragenter", "dragover"].forEach(name => {
             dropZone.addEventListener(name, (e) => {
@@ -383,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 7. Direct Navigation to Full Result Page ---
+    // --- 4. Direct Navigation to Full Result Page ---
     if (btnProcess) {
         btnProcess.addEventListener("click", () => {
             if (currentSessionId) {
@@ -391,7 +240,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    // Initial parameter state sync
-    updateParameterState();
 });

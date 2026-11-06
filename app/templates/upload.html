@@ -13,7 +13,7 @@
             อัปโหลดภาพถ่ายกระดาษคำตอบ A4
         </h1>
         <p class="text-xs text-ink-muted">
-            วางภาพจากกล้องสมาร์ตโฟนหรือสแกนเนอร์ ระบบจะตรวจสอบความคมชัด ดัดมุมเอียง และชดเชยแสงเงาให้อัตโนมัติ
+            วางภาพจากกล้องสมาร์ตโฟนหรือสแกนเนอร์ ระบบจะตรวจสอบความคมชัด ดัดมุมเอียง และวิเคราะห์พารามิเตอร์ OMR ให้อัตโนมัติ
         </p>
     </div>
 
@@ -48,7 +48,7 @@
         </div>
 
         <!-- Selected File Large Interactive Preview Viewport -->
-        <div id="preview-container" class="hidden sketch-sheet p-4 space-y-3 border-2 border-ink">
+        <div id="preview-container" class="hidden sketch-sheet p-4 space-y-4 border-2 border-ink">
             <!-- Header bar with file info and action -->
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-line">
                 <div class="flex items-center space-x-2 overflow-hidden">
@@ -63,29 +63,43 @@
                 </button>
             </div>
 
-            <!-- Pipeline Stage Switcher Tabs -->
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <div class="flex flex-wrap gap-1 text-xs font-display" id="preview-stage-tabs">
-                    <button type="button" class="btn-sketch-red px-2.5 py-1 text-xs stage-tab" data-stage="overlay">
-                        🎯 ผลตรวจ OMR (Overlay)
-                    </button>
-                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="warped">
-                        📐 ดัดระนาบ (Warped)
-                    </button>
-                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="binary">
-                        🔲 ไบนารี (Binary Mask)
-                    </button>
-                    <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab" data-stage="original">
-                        📷 ภาพต้นฉบับ
-                    </button>
+            <!-- Pipeline Stage Switcher Tabs & Live Metrics -->
+            <div class="space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <!-- Compact Stage Tabs in single neat row -->
+                    <div class="flex flex-wrap gap-1.5 text-xs font-display" id="preview-stage-tabs">
+                        <button type="button" class="btn-sketch-red px-2.5 py-1 text-xs stage-tab cursor-pointer" data-stage="overlay">
+                            🎯 ผลตรวจ OMR
+                        </button>
+                        <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab cursor-pointer" data-stage="warped">
+                            📐 ดัดระนาบ
+                        </button>
+                        <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab cursor-pointer" data-stage="binary">
+                            🔲 ไบนารี
+                        </button>
+                        <button type="button" class="btn-sketch-paper px-2.5 py-1 text-xs stage-tab cursor-pointer" data-stage="original">
+                            📷 ภาพต้นฉบับ
+                        </button>
+                    </div>
+
+                    <!-- Auto-calibration Pill -->
+                    <span id="live-calib-badge" class="px-2.5 py-0.5 text-[11px] font-display font-bold text-emerald-800 bg-emerald-50 rounded border border-emerald-300 flex items-center">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-emerald-600"></i>
+                        วิเคราะห์ความไวอัตโนมัติ (Auto-Calibrated)
+                    </span>
                 </div>
-                <!-- Real-time Quick Metric Badge -->
-                <div id="preview-metrics" class="text-[11px] font-mono py-1 px-2.5 bg-paper rounded border border-line/60 flex items-center space-x-2">
-                    <span class="text-emerald-700 font-bold">✓ ฝนชัด: <span id="live-count-filled" class="tabular-nums">-</span></span>
-                    <span class="text-line">|</span>
-                    <span class="text-amber-700 font-bold">⚠️ รอยจาง/กำกวม: <span id="live-count-ambiguous" class="tabular-nums">-</span></span>
-                    <span class="text-line">|</span>
-                    <span class="text-ink-muted">⬜ ว่าง: <span id="live-count-blank" class="tabular-nums">-</span></span>
+
+                <!-- Detection Result Stamps Bar -->
+                <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                    <span class="stamp-filled px-2.5 py-0.5 font-bold font-mono text-xs flex items-center">
+                        ✓ ฝนชัด: <span id="live-count-filled" class="ml-1 tabular-nums">-</span> ข้อ
+                    </span>
+                    <span class="stamp-ambiguous px-2.5 py-0.5 font-bold font-mono text-xs flex items-center">
+                        ⚠️ กำกวม: <span id="live-count-ambiguous" class="ml-1 tabular-nums">-</span> ข้อ
+                    </span>
+                    <span class="stamp-blank px-2.5 py-0.5 font-bold font-mono text-xs flex items-center">
+                        ⬜ เว้นว่าง: <span id="live-count-blank" class="ml-1 tabular-nums">-</span> ข้อ
+                    </span>
                 </div>
             </div>
 
@@ -107,89 +121,22 @@
                     <div class="w-10 h-10 rounded-full bg-ground border-2 border-ink flex items-center justify-center shadow-[2px_2px_0_#38352f]">
                         <i class="fa-solid fa-arrows-rotate fa-spin text-accent text-lg"></i>
                     </div>
-                    <span id="preview-loading-text" class="text-xs font-display font-bold text-ink">กำลังอัปเดตผลตรวจบนภาพ...</span>
+                    <span id="preview-loading-text" class="text-xs font-display font-bold text-ink">กำลังวิเคราะห์ภาพและคำนวณผล OMR อัตโนมัติ...</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Collapsible Parameters Tuning (Accordion Scrap) -->
-        <details class="group sketch-scrap overflow-hidden" open>
-            <summary class="cursor-pointer px-4 py-3 text-xs font-display font-bold text-ink flex items-center justify-between select-none">
-                <span class="flex items-center">
-                    <i class="fa-solid fa-sliders mr-2 text-annotation"></i>
-                    ตั้งค่าความไวในการตรวจจับดินสอ (Sensitivity Tuning)
-                    <span id="param-status-badge" class="ml-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        ค่าเริ่มต้น (Default)
-                    </span>
-                </span>
-                <i class="fa-solid fa-chevron-down text-ink-muted text-xs transition-transform group-open:rotate-180"></i>
-            </summary>
-            <div class="p-4 pt-2 border-t-2 border-dashed border-line/60">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
-                    <div id="card-tlow" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มต่ำสุดที่ระบบเริ่มนับ">1. ความไวต่อรอยจาง (เริ่มนับ)</label>
-                            <span id="val-tlow" class="font-mono font-bold text-xs text-emerald-700">0.15</span>
-                        </div>
-                        <input type="range" id="input-tlow" min="0.05" max="0.30" step="0.01" value="0.15" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">จางกว่านี้ - เว้นว่าง (ตัดรอยลบ/ฝุ่น)</p>
-                    </div>
-
-                    <div id="card-thigh" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ระดับความเข้มที่มั่นใจว่าฝนคำตอบ">2. ความเข้มที่ฝนชัด</label>
-                            <span id="val-thigh" class="font-mono font-bold text-xs text-emerald-700">0.40</span>
-                        </div>
-                        <input type="range" id="input-thigh" min="0.25" max="0.65" step="0.01" value="0.40" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">เข้มเกินนี้ - ฝนแน่นอน (ดินสอ 2B)</p>
-                    </div>
-
-                    <div id="card-delta" class="p-2.5 rounded border border-line/60 bg-paper/60 flex flex-col justify-between">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-[11px] font-display font-bold text-ink truncate pr-1" title="ความต่างระหว่างข้อเพื่อป้องกันฝนสองข้อ">3. ระยะความต่าง</label>
-                            <span id="val-delta" class="font-mono font-bold text-xs text-emerald-700">0.20</span>
-                        </div>
-                        <input type="range" id="input-delta" min="0.10" max="0.35" step="0.01" value="0.20" class="w-full accent-accent cursor-pointer">
-                        <p class="text-[10px] text-ink-muted mt-1 leading-tight">ต่างน้อยกว่านี้ - เตือนกำกวม/ฝนซ้ำ</p>
-                    </div>
-                </div>
-
-                <!-- Reset to Default Button & Helper Note -->
-                <div class="flex items-center justify-between pt-2 border-t border-line/40 text-[11px]">
-                    <span id="param-summary-text" class="text-ink-muted text-[10px] font-mono">ค่าเริ่มต้น: เริ่มนับ 0.15 | ฝนชัด 0.40 | ระยะห่าง 0.20</span>
-                    <button type="button" id="btn-reset-params" onclick="resetOMRParameters(event)" class="font-display font-bold text-xs flex items-center space-x-1.5 py-1 px-2.5 text-emerald-700 transition-all cursor-pointer">
-                        <i class="fa-solid fa-check text-xs text-emerald-600"></i>
-                        <span>ค่าเริ่มต้น</span>
-                    </button>
-                </div>
+            <!-- Prominent Proceed Button -->
+            <div class="pt-2">
+                <button type="button" id="btn-process" class="btn-sketch-red w-full py-3 px-5 text-sm font-display font-bold flex items-center justify-center space-x-2 shadow-[2px_3px_0_#38352f] cursor-pointer">
+                    <i class="fa-solid fa-file-lines text-xs mr-1"></i>
+                    <span id="btn-process-label">ดูรายงานผลคะแนนและตารางตรวจคำตอบฉบับเต็ม &rarr;</span>
+                </button>
             </div>
-        </details>
-
-        <!-- Progress Indicator (During initial upload) -->
-        <div id="progress-container" class="hidden space-y-1.5 pt-1">
-            <div class="flex justify-between text-xs font-mono font-bold text-ink">
-                <span id="progress-text" class="flex items-center">
-                    <i class="fa-solid fa-circle-notch fa-spin mr-1.5 text-accent"></i>
-                    กำลังวิเคราะห์ภาพและตรวจจับพิกัดวงกลม...
-                </span>
-                <span id="progress-percent" class="text-accent">0%</span>
-            </div>
-            <div class="w-full bg-ground rounded border border-ink h-2.5 overflow-hidden">
-                <div id="progress-bar" class="bg-accent h-2.5 transition-all duration-200 w-0"></div>
-            </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="pt-2">
-            <button id="btn-process" disabled class="btn-sketch-red w-full py-3 px-5 text-sm font-display font-bold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-file-lines text-xs"></i>
-                <span id="btn-process-label">ดูรายงานผลคะแนนและตารางตรวจคำตอบฉบับเต็ม &rarr;</span>
-            </button>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/upload.js?v=20261105_interactive"></script>
+<script src="/static/js/upload.js?v=20261106_autocalib"></script>
 {% endblock %}

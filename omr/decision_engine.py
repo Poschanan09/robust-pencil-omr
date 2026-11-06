@@ -29,6 +29,63 @@ each question into one of three explicit states:
 """
 
 from typing import Dict, Any, List, Optional, Tuple
+import numpy as np
+import cv2
+
+
+def auto_calibrate_thresholds(
+    all_features: List[Dict[str, Any]],
+    default_t_low: float = 0.15,
+    default_t_high: float = 0.40,
+    default_delta: float = 0.20
+) -> Tuple[float, float, float]:
+    """Dynamically determine optimal OMR decision thresholds for this specific sheet using
+    1D Otsu's optimal clustering on all bubble fill ratios (Classical DIP).
+
+    Args:
+        all_features: List of question feature dicts from Step 5.
+        default_t_low: Fallback T_low.
+        default_t_high: Fallback T_high.
+        default_delta: Fallback Delta_min.
+
+    Returns:
+        Tuple of (auto_t_low, auto_t_high, auto_delta)
+    """
+    all_fr = []
+    for feat in all_features:
+        for opt, f_data in feat.get("options", {}).items():
+            all_fr.append(f_data.get("fill_ratio", 0.0))
+    all_fr = np.array(all_fr)
+
+    # Need adequate sample count and at least some contrast
+    if len(all_fr) < 20 or all_fr.max() < 0.18:
+        return default_t_low, default_t_high, default_delta
+
+    # Quantize to 8-bit [0, 255] for Otsu's optimal 1D histogram thresholding
+    vals = (np.clip(all_fr, 0, 1) * 255).astype(np.uint8)
+    t_otsu, _ = cv2.threshold(vals, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    t_otsu = t_otsu / 255.0
+
+    blanks = all_fr[all_fr < t_otsu]
+    filled = all_fr[all_fr >= t_otsu]
+
+    # Need at least a small cluster of filled bubbles and blanks
+    if len(filled) < 3 or len(blanks) == 0:
+        return default_t_low, default_t_high, default_delta
+
+    mu_b = float(blanks.mean())
+    std_b = float(blanks.std())
+    mu_f = float(filled.mean())
+
+    # Ensure contrast between the two clusters is statistically significant
+    if mu_f - mu_b < 0.08:
+        return default_t_low, default_t_high, default_delta
+
+    auto_t_low = round(float(np.clip(mu_b + 1.2 * std_b, 0.08, 0.20)), 2)
+    auto_t_high = round(float(np.clip(max(t_otsu, mu_b + 2.0 * std_b), 0.18, 0.35)), 2)
+    auto_delta = round(float(np.clip((mu_f - mu_b) * 0.45, 0.08, 0.18)), 2)
+
+    return auto_t_low, auto_t_high, auto_delta
 
 
 class TriStateDecisionEngine:
@@ -38,7 +95,8 @@ class TriStateDecisionEngine:
         self,
         t_low: float = 0.15,
         t_high: float = 0.40,
-        delta_min: float = 0.20
+        delta_min: float = 0.20,
+        auto_calibrate: bool = False
     ):
         """Initialize the decision engine with configurable threshold boundaries.
         
@@ -46,10 +104,13 @@ class TriStateDecisionEngine:
             t_low: Lower boundary threshold. Below this is definitively empty.
             t_high: Upper boundary threshold. Above this is definitively filled.
             delta_min: Minimum contrast margin required between top two choices.
+            auto_calibrate: Whether to dynamically compute thresholds per sheet.
         """
         self.t_low = float(t_low)
         self.t_high = float(t_high)
         self.delta_min = float(delta_min)
+        self.auto_calibrate = bool(auto_calibrate)
+        self.is_auto_calibrated = False
 
     def decide_single_question(
         self,
@@ -204,6 +265,18 @@ class TriStateDecisionEngine:
                 - results: List of individual question decision records.
                 - summary: Summary dictionary with counts and Rejection Rate.
         """
+        if self.auto_calibrate:
+            calib_tlow, calib_thigh, calib_delta = auto_calibrate_thresholds(
+                all_features,
+                default_t_low=self.t_low,
+                default_t_high=self.t_high,
+                default_delta=self.delta_min
+            )
+            self.t_low = calib_tlow
+            self.t_high = calib_thigh
+            self.delta_min = calib_delta
+            self.is_auto_calibrated = True
+
         results = []
         filled_count = 0
         blank_count = 0
@@ -239,7 +312,8 @@ class TriStateDecisionEngine:
             "thresholds_used": {
                 "t_low": self.t_low,
                 "t_high": self.t_high,
-                "delta_min": self.delta_min
+                "delta_min": self.delta_min,
+                "is_auto_calibrated": self.is_auto_calibrated
             }
         }
 
