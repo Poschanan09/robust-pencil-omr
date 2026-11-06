@@ -47,27 +47,23 @@
                 <i class="fa-solid fa-sliders text-accent mr-1.5"></i>พารามิเตอร์ที่ใช้ตรวจรอบนี้:
             </span>
             <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ความไวเริ่มนับ (T<sub>low</sub>): <strong class="text-accent">{{ data.summary.thresholds_used.t_low|default(0.15) }}</strong>
+                ความไวเริ่มนับ (T<sub>low</sub>): <strong id="param-used-tlow" class="text-accent">{{ data.summary.thresholds_used.t_low|default(0.15) }}</strong>
             </span>
             <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ความเข้มฝนชัด (T<sub>high</sub>): <strong class="text-accent">{{ data.summary.thresholds_used.t_high|default(0.40) }}</strong>
+                ความเข้มฝนชัด (T<sub>high</sub>): <strong id="param-used-thigh" class="text-accent">{{ data.summary.thresholds_used.t_high|default(0.40) }}</strong>
             </span>
             <span class="font-mono bg-paper px-2 py-0.5 rounded border border-line text-ink">
-                ระยะห่างความต่าง (&Delta;F): <strong class="text-accent">{{ data.summary.thresholds_used.delta_min|default(0.20) }}</strong>
+                ระยะห่างความต่าง (&Delta;F): <strong id="param-used-delta" class="text-accent">{{ data.summary.thresholds_used.delta_min|default(0.20) }}</strong>
             </span>
         </div>
         <div>
-            {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}
-            <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-red-100 text-red-700 border border-red-400 flex items-center">
-                <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>
-                ปรับแต่งเอง (Customized)
+            <span id="param-used-badge" class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}bg-red-100 text-red-700 border border-red-400{% else %}bg-emerald-100 text-emerald-800 border border-emerald-300{% endif %} flex items-center">
+                {% if data.summary.thresholds_used and (data.summary.thresholds_used.t_low != 0.15 or data.summary.thresholds_used.t_high != 0.40 or data.summary.thresholds_used.delta_min != 0.20) %}
+                <span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>ปรับแต่งเอง (Customized)
+                {% else %}
+                <span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>ค่ามาตรฐาน (Default)
+                {% endif %}
             </span>
-            {% else %}
-            <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center">
-                <span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>
-                ค่ามาตรฐาน (Default)
-            </span>
-            {% endif %}
         </div>
     </div>
 
@@ -76,48 +72,47 @@
         <div class="pt-2 sm:pt-0 sm:px-3 first:pl-0">
             <span class="text-xs font-display font-bold text-ink-muted block">ข้อสอบทั้งหมด</span>
             <div class="text-2xl font-display font-bold text-ink mt-1 tabular-nums">
-                {{ data.summary.total_questions }} <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
+                <span id="summary-total-questions">{{ data.summary.total_questions }}</span> <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
             </div>
         </div>
         <div class="pt-2 sm:pt-0 sm:px-3">
             <span class="text-xs font-display font-bold text-ink-muted block">ฝนชัดเจน (Filled)</span>
             <div class="text-2xl font-mono font-bold text-emerald-800 mt-1 tabular-nums">
-                {{ data.summary.filled_count }} <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
+                <span id="summary-filled-count">{{ data.summary.filled_count }}</span> <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
             </div>
         </div>
         <div class="pt-2 sm:pt-0 sm:px-3">
             <span class="text-xs font-display font-bold text-ink-muted block">เว้นว่าง (Blank)</span>
             <div class="text-2xl font-mono font-bold text-ink mt-1 tabular-nums">
-                {{ data.summary.blank_count }} <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
+                <span id="summary-blank-count">{{ data.summary.blank_count }}</span> <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
             </div>
         </div>
         <div class="pt-2 sm:pt-0 sm:px-3">
             <span class="text-xs font-display font-bold text-ink-muted block">กำกวม (Ambiguous)</span>
-            <div class="text-2xl font-mono font-bold {% if data.summary.ambiguous_count > 0 %}text-accent{% else %}text-ink-muted{% endif %} mt-1 tabular-nums">
-                {{ data.summary.ambiguous_count }} <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
+            <div id="summary-ambiguous-container" class="text-2xl font-mono font-bold {% if data.summary.ambiguous_count > 0 %}text-accent{% else %}text-ink-muted{% endif %} mt-1 tabular-nums">
+                <span id="summary-ambiguous-count">{{ data.summary.ambiguous_count }}</span> <span class="text-xs font-sans font-normal text-ink-muted">ข้อ</span>
             </div>
         </div>
         <div class="pt-2 sm:pt-0 sm:px-3 col-span-2 sm:col-span-1">
             <span class="text-xs font-display font-bold text-ink-muted block">เวลาประมวลผล</span>
             <div class="text-2xl font-mono font-bold text-annotation mt-1 tabular-nums">
-                {{ data.processing_time_ms }} <span class="text-xs font-mono font-normal text-ink-muted">ms</span>
+                <span id="summary-processing-time">{{ data.processing_time_ms }}</span> <span class="text-xs font-mono font-normal text-ink-muted">ms</span>
             </div>
         </div>
     </div>
 
     <!-- Ambiguous Banner Callout (Sketched Teacher Correction Note) -->
-    {% if data.summary.ambiguous_count > 0 %}
-    <div class="sketch-sheet p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-2 border-accent bg-[#fbf5e8]">
+    <div id="ambiguous-banner" class="sketch-sheet p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-2 border-accent bg-[#fbf5e8] {% if data.summary.ambiguous_count == 0 %}hidden{% endif %}">
         <div class="flex items-start sm:items-center space-x-3.5">
             <div class="w-10 h-10 rounded border-2 border-accent bg-scrap text-accent flex items-center justify-center text-lg flex-shrink-0 mt-0.5 sm:mt-0 font-bold shadow-[2px_2px_0_#9e3a2e]">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
                 <h3 class="text-sm font-display font-bold text-accent">
-                    พบข้อคำตอบกำกวม {{ data.summary.ambiguous_count }} ข้อ ที่เข้าเกณฑ์ Dual-Threshold
+                    พบข้อคำตอบกำกวม <span id="ambiguous-badge-count">{{ data.summary.ambiguous_count }}</span> ข้อ ที่เข้าเกณฑ์ Dual-Threshold
                 </h3>
                 <p class="text-xs text-ink-muted mt-0.5 font-sans">
-                    ข้อที่ตรวจพบ: <span class="font-mono font-bold text-ink">{{ data.summary.ambiguous_questions|join(', ') }}</span> (เช่น รอยลบไม่สะอาด หรือความต่างระดับต่ำกว่า &Delta;F)
+                    ข้อที่ตรวจพบ: <span id="ambiguous-questions-list" class="font-mono font-bold text-ink">{{ data.summary.ambiguous_questions|join(', ') }}</span> (เช่น รอยลบไม่สะอาด หรือความต่างระดับต่ำกว่า &Delta;F)
                 </p>
             </div>
         </div>
@@ -126,7 +121,6 @@
             <span>เปิดคิวตรวจทาน (Human Review) &rarr;</span>
         </a>
     </div>
-    {% endif %}
 
     <!-- Pipeline Step-by-Step Visualization Tabs (Mounted Photo Frame) -->
     <div class="sketch-sheet p-5 space-y-4">
@@ -139,35 +133,43 @@
             </div>
             <!-- Tabs -->
             <div class="flex flex-wrap gap-1.5 font-display text-xs" id="visual-tabs">
-                <button class="btn-sketch-red px-3 py-1 text-xs tab-btn" data-target="img-overlay">
+                <button type="button" class="btn-sketch-red px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-overlay">
                     🎯 1. Overlay ตรวจคำตอบ
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-corners">
+                <button type="button" class="btn-sketch-paper px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-corners">
                     📸 2. ตรวจจับ 4 มุมกระดาษ
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-warped">
+                <button type="button" class="btn-sketch-paper px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-warped">
                     📐 3. ดัดระนาบ Homography
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-binary">
+                <button type="button" class="btn-sketch-paper px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-binary">
                     🔲 4. Binary Mask ปรับแสง
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-edges">
+                <button type="button" class="btn-sketch-paper px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-edges">
                     ⚡ 5. Canny Edges
                 </button>
-                <button class="btn-sketch-paper px-3 py-1 text-xs tab-btn" data-target="img-original">
+                <button type="button" class="btn-sketch-paper px-3 py-1 text-xs tab-btn cursor-pointer" data-target="img-original">
                     🖼️ 6. ภาพถ่ายต้นฉบับ
                 </button>
             </div>
         </div>
 
         <!-- Image Display Viewport (Taped Reference Mount) -->
-        <div class="p-6 bg-ground border-2 border-line rounded-lg flex items-center justify-center min-h-[460px] max-h-[720px] overflow-auto relative">
-            <img id="img-overlay" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
-            <img id="img-corners" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/corners" alt="Corner Detection">
-            <img id="img-warped" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
-            <img id="img-binary" class="max-h-[660px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
-            <img id="img-edges" class="max-h-[660px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
-            <img id="img-original" class="max-h-[660px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
+        <div class="p-4 sm:p-6 bg-ground border-2 border-line rounded-lg flex items-center justify-center min-h-[360px] max-h-[680px] overflow-auto relative">
+            <img id="img-overlay" class="max-h-[620px] object-contain rounded border-2 border-ink bg-white visual-view shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/overlay" alt="Visual Overlay">
+            <img id="img-corners" class="max-h-[620px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/corners" alt="Corner Detection">
+            <img id="img-warped" class="max-h-[620px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/warped" alt="Warped Image">
+            <img id="img-binary" class="max-h-[620px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/binary" alt="Binary Mask">
+            <img id="img-edges" class="max-h-[620px] object-contain rounded border-2 border-ink bg-black visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/edges" alt="Canny Edges">
+            <img id="img-original" class="max-h-[620px] object-contain rounded border-2 border-ink bg-white visual-view hidden shadow-[3px_3px_0_#38352f]" src="/api/process/{{ image_id }}/debug/original" alt="Original Image">
+
+            <!-- Loading Spinner Overlay when re-calculating -->
+            <div id="image-loading-overlay" class="hidden absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center space-y-2 select-none z-10">
+                <div class="w-10 h-10 rounded-full bg-ground border-2 border-ink flex items-center justify-center shadow-[2px_2px_0_#38352f]">
+                    <i class="fa-solid fa-arrows-rotate fa-spin text-accent text-lg"></i>
+                </div>
+                <span class="text-xs font-display font-bold text-ink">กำลังคำนวณและอัปเดตผลบนภาพ...</span>
+            </div>
         </div>
 
         <!-- Visual Legend Bar -->
@@ -199,12 +201,12 @@
                     <i class="fa-solid fa-sliders text-accent mr-2"></i>
                     ปรับจูนพารามิเตอร์แบบเรียลไทม์กับภาพนี้ (Live Tuning on This Sheet)
                 </h3>
-                <p class="text-[11px] text-ink-muted">เลื่อนปรับระดับความไวของดินสอ แล้วกดปุ่มอัปเดตเพื่อดูผลตรวจบนภาพทันที</p>
+                <p class="text-[11px] text-ink-muted">เลื่อนปรับระดับความไวของดินสอ แล้วระบบจะอัปเดตผลตรวจบนภาพทันที</p>
             </div>
             <div class="flex items-center space-x-2">
                 <button type="button" id="btn-reprocess" class="btn-sketch-red px-4 py-2 text-xs font-display font-bold flex items-center space-x-1.5 shadow-[2px_2px_0_#38352f] cursor-pointer">
-                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                    <span>คำนวณและอัปเดตผลบนภาพทันที</span>
+                    <i class="fa-solid fa-arrows-rotate text-xs mr-1"></i>
+                    <span id="btn-reprocess-label">คำนวณและอัปเดตผลบนภาพทันที</span>
                 </button>
             </div>
         </div>
@@ -255,11 +257,16 @@
 
     <!-- Detailed Question Classification Table (Ruled Ledger) -->
     <div class="sketch-sheet p-5 space-y-3 overflow-hidden">
-        <div class="border-b-2 border-line/60 pb-3">
-            <h2 class="text-base font-display font-bold text-ink">
-                ตารางจำแนกผลการตัดสินใจ 50 ข้อ (Classification Matrix)
-            </h2>
-            <p class="text-xs text-ink-muted">แสดงผลการตัดสินใจ ค่า Fill-Ratio รายตัวเลือก และ Contrast Margin (&Delta;F)</p>
+        <div class="border-b-2 border-line/60 pb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <h2 class="text-base font-display font-bold text-ink">
+                    ตารางจำแนกผลการตัดสินใจ 50 ข้อ (Classification Matrix)
+                </h2>
+                <p class="text-xs text-ink-muted">แสดงผลการตัดสินใจ ค่า Fill-Ratio รายตัวเลือก และ Contrast Margin (&Delta;F)</p>
+            </div>
+            <a href="javascript:window.location.reload()" class="btn-sketch-paper text-xs px-2.5 py-1 text-ink-muted hover:text-ink">
+                <i class="fa-solid fa-rotate mr-1"></i>รีเฟรชตาราง
+            </a>
         </div>
 
         <div class="overflow-x-auto">
@@ -275,7 +282,7 @@
                         <th class="px-4 py-2.5 font-bold">เกณฑ์การประเมิน</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-line/40">
+                <tbody id="table-results-body" class="divide-y divide-line/40">
                     {% for q in data.results %}
                     <tr class="hover:bg-highlight/20 transition-colors {% if q.status == 'AMBIGUOUS' %}bg-[#fff9e6]{% endif %}">
                         <td class="px-4 py-2.5 font-mono font-bold text-ink tabular-nums">{{ q.question }}</td>
@@ -298,15 +305,25 @@
                             {% endif %}
                         </td>
                         <td class="px-4 py-2.5 font-mono text-ink-muted">{{ q.confidence }}</td>
-                        <td class="px-4 py-2.5 font-mono text-ink-muted text-[11px] tabular-nums">
-                            {% for opt_key, opt_val in q.fill_ratios.items() %}
-                            <span class="{% if q.answer == opt_key %}font-bold text-accent sketch-highlight{% endif %}">{{ opt_key }}:{{ (opt_val * 100)|round|int }}%</span>{% if not loop.last %} <span class="text-line">|</span> {% endif %}
+                        <td class="px-4 py-2.5 font-mono text-[11px] text-ink-muted">
+                            {% if q.fill_ratios %}
+                            {% for opt, r in q.fill_ratios.items() %}
+                            <span class="mr-2 {% if q.answer == opt %}font-bold text-emerald-800 bg-emerald-50 px-1 rounded{% endif %}">
+                                {{ opt }}: {{ "%.3f"|format(r) }}
+                            </span>
                             {% endfor %}
+                            {% endif %}
                         </td>
-                        <td class="px-4 py-2.5 text-center font-mono font-bold tabular-nums text-ink">
-                            {{ q.delta_f }}
+                        <td class="px-4 py-2.5 font-mono text-center tabular-nums">
+                            {% if q.delta_f is defined and q.delta_f is not none %}
+                            <span class="{% if q.delta_f < 0.20 and q.status != 'BLANK' %}text-accent font-bold{% else %}text-ink-muted{% endif %}">
+                                {{ "%.3f"|format(q.delta_f) }}
+                            </span>
+                            {% else %}
+                            —
+                            {% endif %}
                         </td>
-                        <td class="px-4 py-2.5 text-ink-muted max-w-xs truncate" title="{{ q.reason }}">
+                        <td class="px-4 py-2.5 text-ink-muted font-sans text-[11px] truncate max-w-xs" title="{{ q.reason }}">
                             {{ q.reason }}
                         </td>
                     </tr>
@@ -315,16 +332,21 @@
             </table>
         </div>
     </div>
+
     {% else %}
-    <!-- Rejection Alert Card -->
-    <div class="sketch-sheet p-6 space-y-4 border-2 border-accent bg-[#fef5f5]">
-        <div class="text-center space-y-2">
-            <div class="w-12 h-12 rounded border-2 border-accent bg-scrap text-accent flex items-center justify-center text-xl mx-auto shadow-[2px_2px_0_#9e3a2e]">
-                <i class="fa-solid fa-ban"></i>
+    <!-- Rejection View (Early Failure Notification) -->
+    <div class="sketch-sheet p-6 sm:p-8 space-y-4 border-2 border-accent bg-[#fffaf5]">
+        <div class="flex items-center space-x-3 text-accent border-b border-line pb-3">
+            <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+            <div>
+                <h2 class="text-lg font-display font-bold">ไม่สามารถประมวลผลกระดาษคำตอบได้</h2>
+                <p class="text-xs text-ink-muted">ระบบหยุดการทำงานในขั้นตอนประเมินคุณภาพ (Early Quality Gate Rejection)</p>
             </div>
-            <h2 class="text-lg font-display font-bold text-accent">ระบบปฏิเสธการประมวลผล (Quality Check Rejection)</h2>
-            <p class="text-xs text-ink-muted max-w-lg mx-auto">
-                {{ data.rejection_reason|default('ภาพไม่ผ่านเกณฑ์การตรวจสอบคุณภาพ เช่น มืดเกินไป เบลอ หรือหาขอบกระดาษไม่พบ') }}
+        </div>
+
+        <div class="space-y-2 py-2">
+            <p class="text-sm font-sans font-bold text-ink">
+                สาเหตุที่ปฏิเสธ: <span class="text-accent underline">{{ data.rejection_reason }}</span>
             </p>
             {% if data.recommendation %}
             <p class="text-xs font-bold text-ink max-w-lg mx-auto bg-amber-100/70 p-2 rounded border border-amber-300">
@@ -358,6 +380,7 @@
 {% block scripts %}
 <script>
     // Tab switcher logic
+    let currentTabTarget = "img-overlay";
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -367,16 +390,20 @@
             btn.classList.add('btn-sketch-red');
             btn.classList.remove('btn-sketch-paper');
 
-            const targetId = btn.getAttribute('data-target');
+            currentTabTarget = btn.getAttribute('data-target');
             document.querySelectorAll('.visual-view').forEach(img => img.classList.add('hidden'));
-            const targetImg = document.getElementById(targetId);
-            if (targetImg) targetImg.classList.remove('hidden');
+            const targetImg = document.getElementById(currentTabTarget);
+            if (targetImg) {
+                targetImg.classList.remove('hidden');
+                // Ensure image re-renders if needed
+                if (!targetImg.src.includes('?t=')) {
+                    targetImg.src = targetImg.src + '?t=' + Date.now();
+                }
+            }
         });
     });
 
     // Live Parameter Re-tuning with Image
-    const reprocInputTlow = document.getElementById("reproc-input-tlow");
-    const reprocInputThigh = document.getElementById("reproc-input-thigh");
     const reprocInputTlow = document.getElementById("reproc-input-tlow");
     const reprocInputThigh = document.getElementById("reproc-input-thigh");
     const reprocInputDelta = document.getElementById("reproc-input-delta");
@@ -384,7 +411,25 @@
     const reprocValThigh = document.getElementById("reproc-val-thigh");
     const reprocValDelta = document.getElementById("reproc-val-delta");
     const btnReprocess = document.getElementById("btn-reprocess");
+    const btnReprocessLabel = document.getElementById("btn-reprocess-label");
     const btnReprocReset = document.getElementById("btn-reproc-reset");
+    const imageLoadingOverlay = document.getElementById("image-loading-overlay");
+
+    // Summary Metric Elements
+    const sumFilled = document.getElementById("summary-filled-count");
+    const sumBlank = document.getElementById("summary-blank-count");
+    const sumAmbig = document.getElementById("summary-ambiguous-count");
+    const sumAmbigBox = document.getElementById("summary-ambiguous-container");
+    const ambigBanner = document.getElementById("ambiguous-banner");
+    const ambigBadgeCount = document.getElementById("ambiguous-badge-count");
+    const ambigQuestionsList = document.getElementById("ambiguous-questions-list");
+    const paramUsedTlow = document.getElementById("param-used-tlow");
+    const paramUsedThigh = document.getElementById("param-used-thigh");
+    const paramUsedDelta = document.getElementById("param-used-delta");
+    const paramUsedBadge = document.getElementById("param-used-badge");
+
+    let isReprocessing = false;
+    let reprocDebounceTimer = null;
 
     function syncReprocState() {
         if (!reprocInputTlow || !reprocInputThigh || !reprocInputDelta) return;
@@ -406,46 +451,121 @@
         }
     }
 
+    async function executeReprocess() {
+        if (isReprocessing) return;
+        isReprocessing = true;
+
+        if (btnReprocess) btnReprocess.disabled = true;
+        if (btnReprocessLabel) btnReprocessLabel.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังคำนวณใหม่...';
+        if (imageLoadingOverlay) imageLoadingOverlay.classList.remove("hidden");
+
+        const tlow = reprocInputTlow ? reprocInputTlow.value : "0.15";
+        const thigh = reprocInputThigh ? reprocInputThigh.value : "0.40";
+        const delta = reprocInputDelta ? reprocInputDelta.value : "0.20";
+
+        try {
+            const res = await fetch(`/api/process/{{ image_id }}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
+                method: "POST"
+            });
+            if (!res.ok) throw new Error("Re-process failed");
+            const resultData = await res.json();
+
+            // Refresh all visible images with timestamp cache-buster
+            const ts = Date.now();
+            const overlayImg = document.getElementById("img-overlay");
+            if (overlayImg) overlayImg.src = `/api/process/{{ image_id }}/debug/overlay?t=${ts}`;
+            const targetImg = document.getElementById(currentTabTarget);
+            if (targetImg && targetImg !== overlayImg) {
+                targetImg.src = targetImg.src.split('?')[0] + `?t=${ts}`;
+            }
+
+            // Update top parameter badges
+            if (paramUsedTlow) paramUsedTlow.textContent = Number(tlow).toFixed(2);
+            if (paramUsedThigh) paramUsedThigh.textContent = Number(thigh).toFixed(2);
+            if (paramUsedDelta) paramUsedDelta.textContent = Number(delta).toFixed(2);
+
+            const isCustom = (Number(tlow) !== 0.15 || Number(thigh) !== 0.40 || Number(delta) !== 0.20);
+            if (paramUsedBadge) {
+                paramUsedBadge.className = isCustom
+                    ? "px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-red-100 text-red-700 border border-red-400 flex items-center"
+                    : "px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center";
+                paramUsedBadge.innerHTML = isCustom
+                    ? '<span class="w-2 h-2 rounded-full bg-red-600 mr-1.5 animate-pulse"></span>ปรับแต่งเอง (Customized)'
+                    : '<span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5"></span>ค่ามาตรฐาน (Default)';
+            }
+
+            // Update Summary Metrics
+            if (resultData.summary) {
+                const s = resultData.summary;
+                if (sumFilled) sumFilled.textContent = s.filled_count ?? 0;
+                if (sumBlank) sumBlank.textContent = s.blank_count ?? 0;
+                if (sumAmbig) sumAmbig.textContent = s.ambiguous_count ?? 0;
+
+                if (sumAmbigBox) {
+                    sumAmbigBox.className = (s.ambiguous_count > 0)
+                        ? "text-2xl font-mono font-bold text-accent mt-1 tabular-nums"
+                        : "text-2xl font-mono font-bold text-ink-muted mt-1 tabular-nums";
+                }
+
+                if (ambigBanner) {
+                    if (s.ambiguous_count > 0) {
+                        ambigBanner.classList.remove("hidden");
+                        if (ambigBadgeCount) ambigBadgeCount.textContent = s.ambiguous_count;
+                        if (ambigQuestionsList && s.ambiguous_questions) {
+                            ambigQuestionsList.textContent = s.ambiguous_questions.join(', ');
+                        }
+                    } else {
+                        ambigBanner.classList.add("hidden");
+                    }
+                }
+            }
+
+            if (btnReprocessLabel) {
+                btnReprocessLabel.innerHTML = '<i class="fa-solid fa-check text-emerald-600 mr-1"></i> อัปเดตผลสำเร็จ!';
+                setTimeout(() => {
+                    btnReprocessLabel.innerHTML = 'คำนวณและอัปเดตผลบนภาพทันที';
+                }, 1400);
+            }
+
+        } catch (err) {
+            console.error("Live tuning update error:", err);
+            alert("เกิดข้อผิดพลาดในการอัปเดต: " + err.message);
+            if (btnReprocessLabel) btnReprocessLabel.innerHTML = 'คำนวณและอัปเดตผลบนภาพทันที';
+        } finally {
+            isReprocessing = false;
+            if (btnReprocess) btnReprocess.disabled = false;
+            if (imageLoadingOverlay) imageLoadingOverlay.classList.add("hidden");
+        }
+    }
+
+    function onSliderLiveChange() {
+        syncReprocState();
+        if (reprocDebounceTimer) clearTimeout(reprocDebounceTimer);
+        reprocDebounceTimer = setTimeout(() => {
+            executeReprocess();
+        }, 250);
+    }
+
     [reprocInputTlow, reprocInputThigh, reprocInputDelta].forEach(sl => {
         if (sl) {
-            sl.addEventListener("input", syncReprocState);
-            sl.addEventListener("change", syncReprocState);
+            sl.addEventListener("input", onSliderLiveChange);
+            sl.addEventListener("change", onSliderLiveChange);
         }
     });
     syncReprocState();
 
     if (btnReprocReset) {
-        btnReprocReset.addEventListener("click", async () => {
+        btnReprocReset.addEventListener("click", () => {
             if (reprocInputTlow) reprocInputTlow.value = "0.15";
             if (reprocInputThigh) reprocInputThigh.value = "0.40";
             if (reprocInputDelta) reprocInputDelta.value = "0.20";
             syncReprocState();
-            if (btnReprocess) btnReprocess.click();
+            executeReprocess();
         });
     }
 
     if (btnReprocess) {
-        btnReprocess.addEventListener("click", async () => {
-            btnReprocess.disabled = true;
-            btnReprocess.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> กำลังคำนวณใหม่...';
-
-            const tlow = reprocInputTlow ? reprocInputTlow.value : "0.15";
-            const thigh = reprocInputThigh ? reprocInputThigh.value : "0.40";
-            const delta = reprocInputDelta ? reprocInputDelta.value : "0.20";
-
-            try {
-                const res = await fetch(`/api/process/{{ image_id }}?t_low=${tlow}&t_high=${thigh}&delta_min=${delta}`, {
-                    method: "POST"
-                });
-                if (!res.ok) throw new Error("Re-process failed");
-                // Reload to reflect new overlay, summary metrics, and updated classification table
-                window.location.reload();
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการอัปเดต: " + err.message);
-                btnReprocess.disabled = false;
-                btnReprocess.innerHTML = '<i class="fa-solid fa-arrows-rotate mr-1.5"></i> คำนวณและอัปเดตผลบนภาพทันที';
-            }
-        });
+        btnReprocess.addEventListener("click", executeReprocess);
     }
 </script>
 {% endblock %}
